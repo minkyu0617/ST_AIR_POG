@@ -11,6 +11,7 @@
 
 | # | 문서 | 내용 |
 |---|------|------|
+| 00 | [**용어집**](docs/00_glossary.md) | 문서에 나오는 게임 개발 용어 정리 — **처음이라면 여기부터** |
 | 01 | [제품 개요](docs/01_product_overview.md) | 비전, 타깃, 경쟁 분석, 차별점, 수익 목표 |
 | 02 | [코어 게임플레이](docs/02_core_gameplay.md) | 비행 모델, 코어 루프, 물리 파라미터 |
 | 03 | [조작 & 입력 스펙](docs/03_controls_input_spec.md) | 키 매핑 확정안, 입력 충돌 해소, 게임패드 |
@@ -22,9 +23,12 @@
 | 09 | [UI/UX 플로우](docs/09_ui_ux_flow.md) | 화면 전이, HUD, 토스트 규칙 |
 | 10 | [기술 스택](docs/10_tech_stack.md) | 엔진 선정, 폴더 구조, 성능 목표 |
 | 11 | [아트 & 오디오](docs/11_art_audio_direction.md) | 비주얼 톤, 에셋 물량, 사운드 |
-| 12 | [Steam 출시 & 수익화](docs/12_steam_release_monetization.md) | 가격, 위시리스트, 매출 시나리오 |
+| 12 | [Steam 수익화 전략](docs/12_steam_release_monetization.md) | 가격, 위시리스트, 매출 시나리오 |
 | 13 | [로드맵 & 마일스톤](docs/13_roadmap_milestones.md) | 14개월 일정, 인력, 예산, 리스크 |
 | 14 | [미결정 사항](docs/14_open_questions.md) | 설계자 결정이 필요한 항목 |
+| 15 | [**Steam 출시 절차 & 운영**](docs/15_steam_release_ops.md) | 등록·스토어 페이지·빌드 업로드·출시일·운영 실무 |
+
+> **12번과 15번의 차이**: 12번은 *"얼마에 어떻게 팔 것인가"* (전략), 15번은 *"실제로 무슨 버튼을 어떤 순서로 누르는가"* (실무)입니다.
 
 ---
 
