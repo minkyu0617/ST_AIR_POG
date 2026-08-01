@@ -17,8 +17,16 @@
 | **A4** | **UI는 게임플레이를 모르고, 게임플레이는 UI를 모른다** | HUD 하나 바꿀 때 전투 코드가 재컴파일되면 개발 속도가 무너집니다 |
 
 ### 이름 규칙
-클래스 접두어는 잠정적으로 **`SAP`** (ST_AIR_POG)를 사용합니다.
-게임 제목이 확정되면([14 D-07](14_open_questions.md)) 일괄 변경하되, **M1 착수 전에 확정하는 것이 가장 쌉니다.**
+게임 제목이 **CLOUDLINE**으로 확정되었습니다([14 D-07](14_open_questions.md), 2026-08-01).
+
+| 대상 | 규칙 | 예 |
+|---|---|---|
+| 클래스 접두어 | **`CLD`** | `ACLDAircraftPawn`, `UCLDDataRegistry`, `FCLDMove` |
+| 모듈 / 소스 폴더 | `CloudlineGame` | `Source/CloudlineGame/` |
+| `/Script/` 경로 | `CloudlineGame` | `/Script/CloudlineGame.BattleGameMode` |
+| 저장소 | `ST_AIR_POG` (코드명 유지) | 변경하지 않음 — 이력이 끊기고 이득이 없음 |
+
+> 클래스에 `Cloudline`을 전부 붙이면 이름이 길어져 가독성이 떨어집니다. **클래스는 짧은 `CLD`, 모듈은 전체 이름**으로 분리합니다.
 
 ---
 
@@ -66,8 +74,8 @@ flowchart TD
 > **R5가 특히 중요합니다.** Steam API를 여기저기서 직접 부르면, 나중에 콘솔 이식이나 오프라인 모드를 넣을 때 손댈 곳이 수십 군데가 됩니다. `SteamService` 한 곳만 갈아끼우면 되도록 막아둡니다.
 
 ### 모듈 분리
-Unreal 모듈은 **처음에 단일 모듈(`SAPGame`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
-컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `SAPCore` / `SAPGame` / `SAPUI` 3개로 분리합니다.
+Unreal 모듈은 **처음에 단일 모듈(`CloudlineGame`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
+컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `CloudlineCore` / `CloudlineGame` / `CloudlineUI` 3개로 분리합니다.
 1인~3인 규모에서 처음부터 모듈을 쪼개는 것은 빌드 설정 관리 비용이 이득보다 큽니다.
 
 ---
@@ -78,13 +86,13 @@ Unreal이 이미 정해둔 뼈대에 우리 게임을 어떻게 얹을지입니�
 
 | Unreal 클래스 | 존재 위치 | 우리 구현 | 담는 것 |
 |---|---|---|---|
-| `GameInstance` | 클라이언트/서버 각각, **레벨 전환에도 유지** | `USAPGameInstance` | 서비스 소유, 방 상태, 세션 |
-| `GameMode` | **서버에만 존재** | `ASAPGameModeBase` → 모드별 3종 | 규칙, 승패 판정, 부활, 스폰 |
-| `GameState` | 서버 → 전원 복제 | `ASAPGameState` | 남은 시간, 순위, 공역 반경 |
-| `PlayerState` | 서버 → 전원 복제 | `ASAPPlayerState` | 닉네임, 팀, 킬/데스, 순위, 크레딧 |
-| `PlayerController` | **자기 것만 로컬** | `ASAPPlayerController` | 입력, HUD 소유, 핑 RPC |
-| `Pawn` | 서버 → 전원 복제 | `ASAPAircraftPawn` | 기체 본체 |
-| `HUD` / `UserWidget` | 로컬 전용 | `USAPHUDWidget` 등 | 화면 표시 |
+| `GameInstance` | 클라이언트/서버 각각, **레벨 전환에도 유지** | `UCLDGameInstance` | 서비스 소유, 방 상태, 세션 |
+| `GameMode` | **서버에만 존재** | `ACLDGameModeBase` → 모드별 3종 | 규칙, 승패 판정, 부활, 스폰 |
+| `GameState` | 서버 → 전원 복제 | `ACLDGameState` | 남은 시간, 순위, 공역 반경 |
+| `PlayerState` | 서버 → 전원 복제 | `ACLDPlayerState` | 닉네임, 팀, 킬/데스, 순위, 크레딧 |
+| `PlayerController` | **자기 것만 로컬** | `ACLDPlayerController` | 입력, HUD 소유, 핑 RPC |
+| `Pawn` | 서버 → 전원 복제 | `ACLDAircraftPawn` | 기체 본체 |
+| `HUD` / `UserWidget` | 로컬 전용 | `UCLDHUDWidget` 등 | 화면 표시 |
 
 ### 무엇을 어디에 둘지 — 실수하기 쉬운 지점
 
@@ -105,7 +113,7 @@ Unreal이 이미 정해둔 뼈대에 우리 게임을 어떻게 얹을지입니�
 
 ```mermaid
 classDiagram
-    class ASAPAircraftPawn {
+    class ACLDAircraftPawn {
         +UFlightMovementComponent Movement
         +UHealthComponent Health
         +UWeaponSlotComponent Weapons
@@ -117,8 +125,8 @@ classDiagram
         -float Throttle
         -FRotator Attitude
         -EFlightState State
-        +SimulateMove(FSAPMove, DeltaTime)
-        +GetStateSnapshot() FSAPMoveState
+        +SimulateMove(FCLDMove, DeltaTime)
+        +GetStateSnapshot() FCLDMoveState
     }
     class UWeaponSlotComponent {
         -TArray~FWeaponSlot~ Slots
@@ -133,7 +141,7 @@ classDiagram
         +ApplyDamage(FDamageEvent)
         +OnDeath EventDispatcher
     }
-    class ASAPGameModeBase {
+    class ACLDGameModeBase {
         <<abstract>>
         +CheckWinCondition()*
         +HandlePlayerDeath(PlayerState)*
@@ -143,18 +151,18 @@ classDiagram
     class ABattleGameMode
     class ASingleEnduranceGameMode
 
-    ASAPAircraftPawn *-- UFlightMovementComponent
-    ASAPAircraftPawn *-- UHealthComponent
-    ASAPAircraftPawn *-- UWeaponSlotComponent
-    ASAPAircraftPawn *-- ULockOnComponent
-    ASAPGameModeBase <|-- ASpeedRaceGameMode
-    ASAPGameModeBase <|-- ABattleGameMode
-    ASAPGameModeBase <|-- ASingleEnduranceGameMode
+    ACLDAircraftPawn *-- UFlightMovementComponent
+    ACLDAircraftPawn *-- UHealthComponent
+    ACLDAircraftPawn *-- UWeaponSlotComponent
+    ACLDAircraftPawn *-- ULockOnComponent
+    ACLDGameModeBase <|-- ASpeedRaceGameMode
+    ACLDGameModeBase <|-- ABattleGameMode
+    ACLDGameModeBase <|-- ASingleEnduranceGameMode
 ```
 
 ### 설계 의도
 - **기체는 하나의 클래스뿐입니다.** 기체 8종은 별도 C++ 클래스가 아니라 **DataTable 행 + 메시 + 고유기 클래스**의 조합입니다. 기체를 추가할 때 프로그래머가 필요 없게 만드는 것이 목표입니다.
-- **컴포넌트로 쪼갠 이유**: 적기 AI도 같은 컴포넌트를 재사용합니다. `AEnemyAircraftPawn`은 `ASAPAircraftPawn`을 상속하고 `PlayerController` 대신 `AIController`가 붙을 뿐입니다.
+- **컴포넌트로 쪼갠 이유**: 적기 AI도 같은 컴포넌트를 재사용합니다. `AEnemyAircraftPawn`은 `ACLDAircraftPawn`을 상속하고 `PlayerController` 대신 `AIController`가 붙을 뿐입니다.
 - **GameMode만 모드별로 다릅니다** (A1 요구). 승패 판정·부활·스폰만 갈아끼우면 새 모드가 됩니다.
 
 ---
@@ -168,14 +176,14 @@ classDiagram
 
 ```
 [클라이언트]
-1. 입력 수집 → FSAPMove 구조체 생성 (타임스탬프 + 입력값)
+1. 입력 수집 → FCLDMove 구조체 생성 (타임스탬프 + 입력값)
 2. SimulateMove() 로 즉시 로컬 적용        ← 화면은 지연 없이 반응
-3. FSAPMove 를 미확인 목록(PendingMoves)에 보관
+3. FCLDMove 를 미확인 목록(PendingMoves)에 보관
 4. 서버로 전송
 
 [서버]
 5. 같은 SimulateMove() 실행 (동일 함수!)   ← 결정론 확보의 핵심
-6. 결과 상태(FSAPMoveState)와 처리한 타임스탬프를 회신
+6. 결과 상태(FCLDMoveState)와 처리한 타임스탬프를 회신
 
 [클라이언트]
 7. 회신 상태 vs 그 시점 내 예측값 비교
@@ -241,7 +249,7 @@ stateDiagram-v2
     PostMatch --> [*]: 로비 복귀
 ```
 
-- 상태는 `ASAPGameState::MatchPhase`로 **서버에서만 변경**하고 전원에 복제합니다.
+- 상태는 `ACLDGameState::MatchPhase`로 **서버에서만 변경**하고 전원에 복제합니다.
 - 입력 활성화 시점은 `InProgress` 진입이며, 카운트다운은 [08 §8.4](08_multiplayer_architecture.md)대로 **서버 시각 기준**으로 각자 계산합니다.
 - `Boarding` 단계는 [02 §2.6](02_core_gameplay.md)의 탑승 연출 구간이자 **로딩 편차를 흡수하는 버퍼**입니다.
 
@@ -260,7 +268,7 @@ Alive ──HP≤60──> Damaged ──HP≤30──> Critical ──HP=0─�
 아이템 15종을 `switch` 문으로 처리하면 아이템을 추가할 때마다 여러 파일을 수정하게 됩니다. **데이터와 동작을 분리**합니다.
 
 ```
-FItemRow (DataTable)           USAPItemEffect (UObject)
+FItemRow (DataTable)           UCLDItemEffect (UObject)
 ├ ItemId, 이름, 등급           ├ Execute(Instigator, Context)  ← 실제 동작
 ├ 데미지, 탄수, 쿨다운          ├ CanExecute()
 ├ 아이콘, VFX, SFX 참조         └ (서브클래스가 종류별 구현)
@@ -274,7 +282,7 @@ void UWeaponSlotComponent::ServerFire_Implementation()
     const FItemRow* Row = DataRegistry->FindItem(Slots[SelectedIndex].ItemId);
     if (!Row || !ConsumeAmmo(SelectedIndex)) return;
 
-    USAPItemEffect* Effect = GetOrCreateEffect(Row->EffectClass);
+    UCLDItemEffect* Effect = GetOrCreateEffect(Row->EffectClass);
     Effect->Execute(GetOwner(), BuildContext());
 }
 ```
@@ -283,11 +291,11 @@ void UWeaponSlotComponent::ServerFire_Implementation()
 |---|---|
 | CSV에 행 1줄 추가 | 기획자 |
 | 아이콘·VFX 연결 | 아티스트 |
-| `USAPItemEffect` 서브클래스 1개 | 프로그래머 (기존 효과 재사용 시 **0**) |
+| `UCLDItemEffect` 서브클래스 1개 | 프로그래머 (기존 효과 재사용 시 **0**) |
 
 > 유도미사일/로켓/레일건은 전부 `UProjectileEffect` 하나로 처리되고, 파라미터만 다릅니다. 실제로 새 클래스가 필요한 것은 EMP·차폐 필드처럼 **동작 방식 자체가 다른 것**뿐입니다.
 
-**동일한 패턴을 기체 고유기(`USAPAbility`)와 POI 상점 항목에도 적용**합니다.
+**동일한 패턴을 기체 고유기(`UCLDAbility`)와 POI 상점 항목에도 적용**합니다.
 
 ---
 
@@ -297,10 +305,10 @@ A4 요구(게임플레이와 UI 분리)의 실현 수단입니다.
 
 ```cpp
 // 게임플레이: 발행만 한다. 누가 듣는지 모른다.
-EventBus->Broadcast(FSAPEvent_Kill{ KillerId, VictimId, WeaponId });
+EventBus->Broadcast(FCLDEvent_Kill{ KillerId, VictimId, WeaponId });
 
 // UI: 구독만 한다. 어디서 오는지 모른다.
-EventBus->Subscribe<FSAPEvent_Kill>(this, &UKillFeedWidget::OnKill);
+EventBus->Subscribe<FCLDEvent_Kill>(this, &UKillFeedWidget::OnKill);
 ```
 
 | 이벤트 | 발행처 | 구독처 |
@@ -322,7 +330,7 @@ EventBus->Subscribe<FSAPEvent_Kill>(this, &UKillFeedWidget::OnKill);
 모든 DataTable 접근을 한 곳으로 모읍니다.
 
 ```cpp
-class USAPDataRegistry : public UGameInstanceSubsystem
+class UCLDDataRegistry : public UGameInstanceSubsystem
 {
     const FAircraftRow* FindAircraft(FName Id) const;
     const FItemRow*     FindItem(FName Id) const;
@@ -366,39 +374,39 @@ sequenceDiagram
 ## 16.12 폴더 구조 (10번 문서 확장)
 
 ```
-Source/SAPGame/
+Source/CloudlineGame/
 ├── Core/
-│   ├── SAPGameInstance.h/cpp
+│   ├── CLDGameInstance.h/cpp
 │   ├── Services/
-│   │   ├── SAPDataRegistry.*
-│   │   ├── SAPEventBus.*
-│   │   ├── SAPSaveService.*
-│   │   ├── SAPSettingsService.*
-│   │   └── SAPAudioService.*
+│   │   ├── CLDDataRegistry.*
+│   │   ├── CLDEventBus.*
+│   │   ├── CLDSaveService.*
+│   │   ├── CLDSettingsService.*
+│   │   └── CLDAudioService.*
 │   └── Types/                    # 공용 enum, 구조체 (의존 없음)
 ├── Platform/
-│   ├── SAPSteamService.*         # ← Steam API를 아는 유일한 곳
-│   └── SAPTelemetry.*
+│   ├── CLDSteamService.*         # ← Steam API를 아는 유일한 곳
+│   └── CLDTelemetry.*
 ├── Flight/
-│   ├── SAPAircraftPawn.*
+│   ├── CLDAircraftPawn.*
 │   ├── FlightMovementComponent.* # SimulateMove() 순수 함수
-│   ├── FlightTypes.h             # FSAPMove, FSAPMoveState
-│   └── SAPInputHandler.*         # 03번 문서 상태 머신
+│   ├── FlightTypes.h             # FCLDMove, FCLDMoveState
+│   └── CLDInputHandler.*         # 03번 문서 상태 머신
 ├── Combat/
 │   ├── HealthComponent.*  WeaponSlotComponent.*  LockOnComponent.*
-│   ├── Effects/                  # USAPItemEffect 서브클래스들
+│   ├── Effects/                  # UCLDItemEffect 서브클래스들
 │   ├── Projectiles/
 │   └── Abilities/                # 기체 고유기
 ├── POI/
-│   ├── SAPPoiStation.*  PoiDockingComponent.*  StoreTransaction.*
+│   ├── CLDPoiStation.*  PoiDockingComponent.*  StoreTransaction.*
 ├── Modes/
-│   ├── SAPGameModeBase.*  SAPGameState.*  SAPPlayerState.*  SAPPlayerController.*
+│   ├── CLDGameModeBase.*  CLDGameState.*  CLDPlayerState.*  CLDPlayerController.*
 │   ├── SingleEnduranceGameMode.*  SpeedRaceGameMode.*  BattleGameMode.*
 │   └── Rules/                    # 승패 판정, 부활, 공역 수축
 ├── Net/
-│   ├── SAPRoomSubsystem.*  RoomTypes.h  MatchmakingService.*
+│   ├── CLDRoomSubsystem.*  RoomTypes.h  MatchmakingService.*
 ├── AI/
-│   ├── EnemyAircraftPawn.*  SAPAIController.*  Behaviors/
+│   ├── EnemyAircraftPawn.*  CLDAIController.*  Behaviors/
 ├── World/
 │   ├── CourseSpline.*  CheckpointVolume.*  ProceduralGenerator.*  Hazards/
 └── UI/
@@ -463,7 +471,7 @@ Source/SAPGame/
 | AR3 | EventBus 남용으로 흐름 추적 불가 | "게임플레이 → UI" 단방향에만 사용 |
 | AR4 | DataTable 참조 오류가 런타임 크래시로 | `ValidateAll()`을 CI에서 강제 |
 | AR5 | UI가 게임플레이에 직접 의존 | 폴더 간 include 방향 검사 스크립트를 CI에 추가 |
-| AR6 | 프로젝트 접두어(`SAP`)를 늦게 변경 | **M1 착수 전 게임명 확정** → [14 D-07](14_open_questions.md) |
+| ~~AR6~~ | ~~프로젝트 접두어를 늦게 변경~~ | ✅ **해소** — 제목 CLOUDLINE 확정, 접두어 `CLD` 고정 ([14 D-07](14_open_questions.md)) |
 
 ---
 
@@ -473,16 +481,16 @@ Source/SAPGame/
 
 ```
 ✅ 만든다                          ⏸ M3까지 미룬다
-SAPGameInstance                   예측/화해 레이어
-SAPDataRegistry (기체/아이템)       RoomSubsystem
-SAPEventBus                       SteamService
-SAPAircraftPawn                   MatchmakingService
+CLDGameInstance                   예측/화해 레이어
+CLDDataRegistry (기체/아이템)       RoomSubsystem
+CLDEventBus                       SteamService
+CLDAircraftPawn                   MatchmakingService
 FlightMovementComponent           팀 로직
   └ SimulateMove() 순수 함수        서든데스
 HealthComponent                   봇 AI
 WeaponSlotComponent (기총 + 2종)
-SAPGameModeBase + SingleEndurance
-SAPPoiStation (정비소 1종)
+CLDGameModeBase + SingleEndurance
+CLDPoiStation (정비소 1종)
 HUD + 미니맵
 ```
 

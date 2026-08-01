@@ -165,11 +165,11 @@ MAP_ENDLESS,MAP_ENDLESS_NAME,/Game/Maps/E1_Endless,SingleEndurance,0,0,1,1,/Game
 ```csv
 # DT_Mode.csv — 모드 규칙 자체를 데이터화
 Id,GameModeClass,Lives,RespawnDelay,InvulnDuration,TimeLimitSec,SuddenDeathAtSec,HardCutSec,TeamCountMin,TeamCountMax,AllowFriendlyFire,ScoreTable
-SingleEndurance,/Script/SAPGame.SingleEnduranceGameMode,1,0,0,0,0,0,0,0,false,
-SpeedSolo,/Script/SAPGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,0,0,false,
-SpeedTeam,/Script/SAPGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,2,5,false,10;8;6;5;4;3;2;1
-BattleFFA,/Script/SAPGame.BattleGameMode,3,8.0,3.0,360,360,480,0,0,false,
-BattleTeam,/Script/SAPGame.BattleGameMode,-1,8.0,3.0,360,360,480,2,5,false,
+SingleEndurance,/Script/CloudlineGame.SingleEnduranceGameMode,1,0,0,0,0,0,0,0,false,
+SpeedSolo,/Script/CloudlineGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,0,0,false,
+SpeedTeam,/Script/CloudlineGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,2,5,false,10;8;6;5;4;3;2;1
+BattleFFA,/Script/CloudlineGame.BattleGameMode,3,8.0,3.0,360,360,480,0,0,false,
+BattleTeam,/Script/CloudlineGame.BattleGameMode,-1,8.0,3.0,360,360,480,2,5,false,
 ```
 
 > **모드 규칙을 데이터로 뺀 이유**: "부활 시간을 8초에서 6초로" 같은 조정이 출시 후 수십 번 발생합니다. `Lives=-1`은 무제한(팀 공유 풀 사용)을 뜻합니다.
@@ -250,10 +250,10 @@ SCALE_MAX_MULTIPLIER,3.0
 
 ## 17.9 세이브 데이터
 
-### 로컬 세이브 (`SAPSaveGame`)
+### 로컬 세이브 (`CLDSaveGame`)
 ```cpp
 USTRUCT()
-struct FSAPSaveData
+struct FCLDSaveData
 {
     int32   SaveVersion;              // 마이그레이션용. 반드시 첫 필드
     int32   PlayerLevel;
@@ -262,9 +262,9 @@ struct FSAPSaveData
     TArray<FName> UnlockedAircraft;
     TArray<FName> UnlockedModules;
     TArray<FName> OwnedCosmetics;
-    TMap<FName, FSAPLoadout>  Loadouts;      // 기체별 부품 구성
-    TMap<FName, FSAPMapRecord> MapRecords;   // 맵별 최고 기록
-    FSAPSettings Settings;                    // 키 바인딩, 그래픽, 접근성
+    TMap<FName, FCLDLoadout>  Loadouts;      // 기체별 부품 구성
+    TMap<FName, FCLDMapRecord> MapRecords;   // 맵별 최고 기록
+    FCLDSettings Settings;                    // 키 바인딩, 그래픽, 접근성
     FDateTime LastDailyReset;
 };
 ```
@@ -278,9 +278,9 @@ struct FSAPSaveData
 
 > **`SaveVersion`을 처음부터 넣으십시오.** 나중에 필드를 추가할 때 이게 없으면 기존 유저의 세이브가 전부 깨지고, 출시 후에 그 일이 벌어지면 되돌릴 방법이 없습니다.
 
-### 리더보드 제출 (`FSAPRecord`)
+### 리더보드 제출 (`FCLDRecord`)
 ```cpp
-struct FSAPRecord
+struct FCLDRecord
 {
     int64   DistanceCm;        // 정렬 키
     FName   MapId;
@@ -309,8 +309,8 @@ struct FSAPRecord
 
 | 방향 | 이름 | 신뢰성 | 설명 |
 |---|---|---|---|
-| C→S | `ServerSendMove(FSAPMove)` | Unreliable | 60Hz. 손실 대비 3프레임 중복 |
-| S→C | `ClientAckMove(FSAPMoveState, Timestamp)` | Unreliable | 화해용 |
+| C→S | `ServerSendMove(FCLDMove)` | Unreliable | 60Hz. 손실 대비 3프레임 중복 |
+| S→C | `ClientAckMove(FCLDMoveState, Timestamp)` | Unreliable | 화해용 |
 | C→S | `ServerFire(SlotIndex, AimDir, ClientTime)` | Reliable | 발사 요청 |
 | S→All | `MulticastFireFX(PawnId, ItemId, Origin, Dir)` | Unreliable | 이펙트 |
 | S→All | `MulticastKill(KillerId, VictimId, ItemId)` | Reliable | 킬피드 |
@@ -325,7 +325,7 @@ struct FSAPRecord
 ### 방 상태 구조체
 ```cpp
 USTRUCT()
-struct FSAPRoomState
+struct FCLDRoomState
 {
     FString  RoomName;
     FString  JoinCode;            // 6자리
@@ -335,11 +335,11 @@ struct FSAPRoomState
     int32    TeamCount;
     ERoomLockState LockState;
     uint32   SettingsVersion;     // 경합 방지 → 16 §16.11
-    TArray<FSAPRoomPlayer> Players;
+    TArray<FCLDRoomPlayer> Players;
 };
 
 USTRUCT()
-struct FSAPRoomPlayer
+struct FCLDRoomPlayer
 {
     int32   PlayerId;
     FString Nickname;
@@ -353,7 +353,7 @@ struct FSAPRoomPlayer
 ### 토스트 이벤트
 ```cpp
 USTRUCT()
-struct FSAPToastEvent
+struct FCLDToastEvent
 {
     EToastType Type;      // MODE_CHANGED, MAP_CHANGED, PLAYER_JOIN ...
     FName   BeforeKey;    // 변경 전 (문자열 키)
@@ -370,7 +370,7 @@ struct FSAPToastEvent
 ```cpp
 // 클라이언트 → 서버 (입력)
 USTRUCT()
-struct FSAPMove
+struct FCLDMove
 {
     float   ClientTimestamp;
     uint8   InputFlags;      // 비트: W,A,S,D,Space,Ctrl,Fire
@@ -380,7 +380,7 @@ struct FSAPMove
 
 // 서버 → 클라이언트 (권위 상태)
 USTRUCT()
-struct FSAPMoveState
+struct FCLDMoveState
 {
     float     Timestamp;     // 어느 Move까지 처리했는지
     FVector_NetQuantize100 Location;
@@ -394,7 +394,7 @@ struct FSAPMoveState
 
 - `InputFlags`를 **비트 플래그로 압축**해 60Hz 전송의 대역폭을 줄입니다.
 - `FVector_NetQuantize100`은 cm 단위 정밀도로 압축 전송하는 Unreal 내장 타입입니다.
-- **`FSAPMove`에 위치를 넣지 않습니다.** 위치를 클라이언트가 보내면 텔레포트핵이 가능해집니다. **입력만 보내고 위치는 서버가 계산**합니다.
+- **`FCLDMove`에 위치를 넣지 않습니다.** 위치를 클라이언트가 보내면 텔레포트핵이 가능해집니다. **입력만 보내고 위치는 서버가 계산**합니다.
 
 ---
 

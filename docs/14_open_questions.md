@@ -69,14 +69,43 @@
 | **영향 문서** | [04](04_game_modes.md), [06](06_combat_items.md) |
 | **결정** | ⬜ 미정 |
 
-### D-07. 게임 제목 확정
+### D-07. 게임 제목 확정 ✅
 | | |
 |---|---|
-| **후보** | SKYBREAK / Cloudline / ALTITUDE ZERO / Skyport Rush / Vector Wings |
-| **고려사항** | Steam·상표 검색 중복 여부, 검색 시 상위 노출, 4개 언어 발음 용이성, 도메인 확보 |
-| **권장** | 상표 검색 후 결정. **"Sky"류는 이미 포화**이므로 차별화 필요 |
-| **영향 문서** | [12](12_steam_release_monetization.md), 전 문서 |
-| **결정** | ⬜ 미정 |
+| **결정** | ✅ **CLOUDLINE** (2026-08-01) |
+| **근거** | 게임의 차별점(구름 위 3차원 경로 선택)을 제목이 직접 전달하는 유일한 후보. Steam 내 동명 게임 없음. 4개 언어 발음 무난(클라우드라인 / クラウドライン / 云线). 9자로 소형 캡슐 판독 가능 |
+| **잔여 리스크** | `Cloud`가 흔한 단어라 검색 결과에 클라우드 게이밍 문서가 섞임 → 스토어 태그·설명에 `arcade flight` `aerial racing` 키워드를 반드시 포함해 보완 |
+| **영향 문서** | [16](16_architecture.md) 접두어 `CLD` 확정, README, [12](12_steam_release_monetization.md) |
+
+#### 검토·탈락한 후보 (Steam 실검색 기준, 2026-08-01)
+
+| 후보 | 결과 |
+|---|---|
+| SKYBREAK | ❌ Sky Break(2016) · Skybreakers · Break Sky 3중 충돌 |
+| ALTITUDE ZERO | 🔴 Altitude(2009)가 **멀티플레이 공중전 게임**. 장르까지 겹쳐 최악 |
+| Skyport Rush | ⚠️ Skyport Games(보드게임 퍼블리셔) 회사명 충돌 |
+| Vector Wings | ⚠️ "Wings" 계열 포화 |
+| The King of Sky | ❌ 영문법 오류(관사 누락) + 동명 모바일 슈팅 게임 + 동명 슬롯머신이 검색 상위 점유 |
+| Updraft | ❌ 동명 항공 게임 존재 |
+| Contrail | ⚠️ MS 플라이트 시뮬레이터 애드온 개발사 브랜드 |
+| Crosswind | ❌ Crosswind(2025 해적 MMO) · Crosswinds(하늘 배경 어드벤처) |
+| Cleared Hot | 🔴 2025년 출시 헬기 슈터(MicroProse, 리뷰 96%) |
+| Tally Ho | ❌ 동명 텍스트 어드벤처 |
+| Barnstormer | ❌ Barnstormers: Determined to Win(2023) |
+| CALLSIGN | ⚠️ itch.io 동명작 + 개발 중 동명 프로젝트, 검색 혼잡 |
+| JET JOCKEY | ✅ 충돌 없음 — **차점 후보**. 레이싱+전투를 동시에 암시했으나 게임 정체성 전달력이 CLOUDLINE보다 약함 |
+| MACHPOINT | ✅ 충돌 없음 — 3순위 |
+| FOX TWO | ✅ 충돌 없음. 단 전투 전용 어감 + Fox 상표 확인 필요 |
+| BANKTURN | ✅ 충돌 없음. `Bank`=은행 오해 소지 |
+
+> ⚠️ **위 검증은 "Steam에 같은 이름의 게임이 있는가"까지입니다. 상표권 확인은 별도입니다.**
+> M4(데모/Next Fest) 이전에 [키프리스](http://www.kipris.or.kr)에서 **제9류(소프트웨어)·제41류(게임 서비스)** 상표 검색을 완료하고 결과를 여기에 기록하십시오.
+
+#### 후속 작업
+- [ ] 키프리스 상표 검색 (제9류·제41류)
+- [ ] 도메인 확보 (`cloudline.gg` 등 — `.com`은 선점 가능성 높음)
+- [ ] X / 유튜브 / 디스코드 핸들 확보
+- [x] 클래스 접두어 `CLD` 확정 → [16 §16.1](16_architecture.md)
 
 ### D-08. 국내 게임물 등급 분류 의무
 | | |
