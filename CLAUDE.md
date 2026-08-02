@@ -5,7 +5,7 @@
 | 구분 | 값 |
 |---|---|
 | 저장소 | `ST_AIR_POG` |
-| **프로젝트 코드명** | **`FPG`** 🔒 영구 고정 |
+| **프로젝트 코드명** | **`FPG`** (Final Pilot Game) 🔒 영구 고정 |
 | **게임 제목** | **미정** (M4 전 확정 예정) |
 
 ⚠️ **게임 제목을 코드·에셋 경로·데이터 ID에 넣지 마십시오.** 제목은 문자열 테이블과 스토어 자산에만 존재합니다. 제목이 바뀌어도 코드는 손대지 않습니다.
@@ -34,7 +34,7 @@
 | 대상 | 규칙 | 예 |
 |---|---|---|
 | 클래스 접두어 | `FPG` | `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
-| 모듈 / 소스 폴더 | `FPGGame` | `Source/FPGGame/` |
+| 모듈 / 소스 폴더 | `FPG` | `Source/FPG/` |
 | 데이터 ID | 대문자 스네이크 | `AIRCRAFT_FALCON`, `ITEM_RAILGUN` |
 
 ## 문서 작성 규칙

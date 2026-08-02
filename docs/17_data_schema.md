@@ -165,11 +165,11 @@ MAP_ENDLESS,MAP_ENDLESS_NAME,/Game/Maps/E1_Endless,SingleEndurance,0,0,1,1,/Game
 ```csv
 # DT_Mode.csv — 모드 규칙 자체를 데이터화
 Id,GameModeClass,Lives,RespawnDelay,InvulnDuration,TimeLimitSec,SuddenDeathAtSec,HardCutSec,TeamCountMin,TeamCountMax,AllowFriendlyFire,ScoreTable
-SingleEndurance,/Script/FPGGame.SingleEnduranceGameMode,1,0,0,0,0,0,0,0,false,
-SpeedSolo,/Script/FPGGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,0,0,false,
-SpeedTeam,/Script/FPGGame.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,2,5,false,10;8;6;5;4;3;2;1
-BattleFFA,/Script/FPGGame.BattleGameMode,3,8.0,3.0,360,360,480,0,0,false,
-BattleTeam,/Script/FPGGame.BattleGameMode,-1,8.0,3.0,360,360,480,2,5,false,
+SingleEndurance,/Script/FPG.SingleEnduranceGameMode,1,0,0,0,0,0,0,0,false,
+SpeedSolo,/Script/FPG.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,0,0,false,
+SpeedTeam,/Script/FPG.SpeedRaceGameMode,-1,5.0,3.0,480,0,480,2,5,false,10;8;6;5;4;3;2;1
+BattleFFA,/Script/FPG.BattleGameMode,3,8.0,3.0,360,360,480,0,0,false,
+BattleTeam,/Script/FPG.BattleGameMode,-1,8.0,3.0,360,360,480,2,5,false,
 ```
 
 > **모드 규칙을 데이터로 뺀 이유**: "부활 시간을 8초에서 6초로" 같은 조정이 출시 후 수십 번 발생합니다. `Lives=-1`은 무제한(팀 공유 풀 사용)을 뜻합니다.

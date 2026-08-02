@@ -22,14 +22,14 @@
 
 | 구분 | 값 | 확정 시점 | 변경 가능성 |
 |---|---|---|---|
-| **프로젝트 코드명** | **`FPG`** | ✅ 2026-08-02 확정 | **없음 (영구 고정)** |
+| **프로젝트 코드명** | **`FPG`** = **F**inal **P**ilot **G**ame | ✅ 2026-08-02 확정 | **없음 (영구 고정)** |
 | **게임 제목** | 미정 | M4(스토어 페이지 오픈) 전 | 그전까지 자유 |
 
 | 대상 | 규칙 | 예 |
 |---|---|---|
 | 클래스 접두어 | **`FPG`** | `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
-| 모듈 / 소스 폴더 | `FPGGame` | `Source/FPGGame/` |
-| `/Script/` 경로 | `FPGGame` | `/Script/FPGGame.BattleGameMode` |
+| 모듈 / 소스 폴더 | `FPG` | `Source/FPG/` — `FPGGame`으로 쓰지 않음(`Game` 중복) |
+| `/Script/` 경로 | `FPG` | `/Script/FPG.BattleGameMode` |
 | 저장소 | `ST_AIR_POG` | 변경하지 않음 — 이력이 끊기고 이득이 없음 |
 | 데이터 ID | 대문자 스네이크 | `AIRCRAFT_FALCON`, `ITEM_RAILGUN` |
 
@@ -82,8 +82,8 @@ flowchart TD
 > **R5가 특히 중요합니다.** Steam API를 여기저기서 직접 부르면, 나중에 콘솔 이식이나 오프라인 모드를 넣을 때 손댈 곳이 수십 군데가 됩니다. `SteamService` 한 곳만 갈아끼우면 되도록 막아둡니다.
 
 ### 모듈 분리
-Unreal 모듈은 **처음에 단일 모듈(`FPGGame`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
-컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `FPGCore` / `FPGGame` / `FPGUI` 3개로 분리합니다.
+Unreal 모듈은 **처음에 단일 모듈(`FPG`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
+컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `FPGCore` / `FPG` / `FPGUI` 3개로 분리합니다.
 1인~3인 규모에서 처음부터 모듈을 쪼개는 것은 빌드 설정 관리 비용이 이득보다 큽니다.
 
 ---
@@ -382,7 +382,7 @@ sequenceDiagram
 ## 16.12 폴더 구조 (10번 문서 확장)
 
 ```
-Source/FPGGame/
+Source/FPG/
 ├── Core/
 │   ├── FPGGameInstance.h/cpp
 │   ├── Services/
