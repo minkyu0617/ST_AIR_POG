@@ -1,9 +1,22 @@
-# CLOUDLINE — 프로젝트 인수인계 문서
+# FPG — 프로젝트 인수인계 문서
 
 > **이 문서 하나만 읽으면 프로젝트를 이어받을 수 있도록** 작성했습니다.
 > 새 작업 세션(로컬 Claude Code 포함)을 시작할 때 이 파일을 먼저 여세요.
 >
-> 최종 갱신: **2026-08-01** · 저장소 코드명 `ST_AIR_POG` · 게임 제목 **CLOUDLINE**
+> 최종 갱신: **2026-08-02** · 저장소 `ST_AIR_POG` · 프로젝트 코드명 **`FPG`** · 게임 제목 **미정**
+
+## 이름에 대해 — 먼저 읽으세요
+
+| 구분 | 값 | 성격 |
+|---|---|---|
+| **프로젝트 코드명** | **`FPG`** 🔒 | 코드 접두어·모듈명. **영구 고정, 절대 변경 없음** |
+| **게임 제목** | **미정** | 스토어·마케팅용. M4 전까지 확정하면 됨 |
+
+**둘은 완전히 분리돼 있습니다.** 제목이 무엇으로 정해지든 코드는 손대지 않습니다.
+제목을 코드·에셋 경로·데이터 ID에 넣지 마십시오. 제목은 **문자열 테이블과 스토어 자산에만** 존재합니다.
+
+> 한때 제목 후보였던 `CLOUDLINE`은 **동명 국내 법인(클라우드라인㈜, 3D/VR 소프트웨어)** 발견으로 폐기됐습니다.
+> 그때 접두어가 제목과 묶여 있었다면 전체 소스를 다시 손봐야 했습니다. 이 분리가 그 비용을 0으로 만듭니다.
 
 ---
 
@@ -12,15 +25,16 @@
 | 항목 | 상태 |
 |---|---|
 | 설계 문서 | ✅ **완료** (18종, `docs/`) |
-| 게임 제목 | ✅ **CLOUDLINE 확정** |
+| 프로젝트 코드명 | ✅ **`FPG` 확정** (영구 고정) |
+| 게임 제목 | ⚠️ **미정** — CLOUDLINE 폐기, 후보 재탐색 (M4 전까지) |
 | 코드 | ❌ **0줄** — 아직 엔진 프로젝트도 생성 전 |
 | 에셋 | ❌ 없음 |
 | Steam 등록 | ❌ 안 함 |
-| 상표 검색 | ❌ **미확인 (우선 처리 필요)** |
+| 상표 검색 | ❌ 미확인 — 제목 확정 시 필요 (M4 전) |
 
 **현재 단계: 프리프로덕션 종료 직전. 다음은 M0(설계 확정) → M1(수직 슬라이스).**
 
-작업 브랜치: `claude/steam-airplane-game-design-vp7gu9` (아직 `main` 미병합)
+브랜치: `main` (기본) · `claude/steam-airplane-game-design-vp7gu9` (작업 브랜치, 동일 내용)
 
 ---
 
@@ -81,10 +95,11 @@
 ### ✅ 확정
 | 항목 | 결정 |
 |---|---|
-| 게임 제목 | **CLOUDLINE** (2026-08-01) |
-| 클래스 접두어 | **`CLD`** (예: `ACLDAircraftPawn`) |
-| 모듈·소스 폴더 | `CloudlineGame` (`Source/CloudlineGame/`) |
+| **프로젝트 코드명** | **`FPG`** 🔒 영구 고정 (2026-08-02) |
+| 클래스 접두어 | `FPG` — `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
+| 모듈·소스 폴더 | `FPGGame` (`Source/FPGGame/`) |
 | 저장소 이름 | `ST_AIR_POG` 유지 (이력 보존) |
+| 게임 제목 | ⚠️ **미정** — 코드와 분리되어 있어 개발을 막지 않음 |
 
 ### 🔴 M1 착수 전 반드시 결정 → `docs/14`
 | ID | 항목 | 권장안 |
@@ -106,14 +121,20 @@
 ## 5. 다음에 할 일 (우선순위 순)
 
 ### 즉시
-- [ ] **키프리스 상표 검색** — `CLOUDLINE` 제9류(SW)·제41류(게임 서비스) → [kipris.or.kr](http://www.kipris.or.kr)
-- [ ] 도메인 확보 (`cloudline.gg` 권장, `.com`은 선점 가능성 높음)
-- [ ] X / 유튜브 / 디스코드 핸들 확보
-- [ ] **D-01 ~ D-04 결정** (`docs/14`에 기록)
-- [ ] 이 브랜치를 `main`에 병합
+- [ ] **D-01 ~ D-04 결정** (`docs/14`에 기록) — 특히 엔진
+- [ ] M0 착수 (아래 참조)
+
+### 게임 제목 (M4 전까지, 개발과 병행)
+- [ ] 후보 3종 검토: `ZEROLIFT` / `CHANDELLE` / `BANKTURN`
+- [ ] **5중 검증**: ① Steam ② 타 플랫폼 게임 ③ 회사·법인명 ④ 도메인 ⑤ 상표 DB
+- [ ] **변리사 상표 클리어런스** (제9류·제41류) — 자체 검색으로 "깨끗하다" 결론 금지
+- [ ] 도메인 + SNS 핸들 확보
+
+> ⚠️ 상표 DB(KIPRIS·마크인포 등)는 자동 조회가 차단돼 있어 **사람이 직접** 검색해야 합니다.
+> ⚠️ 제목 미확정이 개발을 막지 않습니다. **M1을 먼저 시작하세요.**
 
 ### M0 — 설계 확정 (1개월)
-- [ ] 엔진 설치 및 프로젝트 생성 (`CloudlineGame` 모듈)
+- [ ] 엔진 설치 및 프로젝트 생성 (`FPGGame` 모듈)
 - [ ] Git LFS 설정 (`*.uasset` `*.umap` `*.wav` `*.png` `*.fbx`)
 - [ ] `docs/17`의 CSV를 `Config/DataTables/`에 배치
 - [ ] `ValidateAll()` 데이터 검증 골격 + CI 연결
@@ -123,11 +144,11 @@
 
 만들 것 (`docs/16 §16.17`):
 ```
-CLDGameInstance          CLDAircraftPawn
-CLDDataRegistry          FlightMovementComponent  ← SimulateMove() 순수 함수
-CLDEventBus              HealthComponent
-CLDGameModeBase          WeaponSlotComponent (기총 + 아이템 2종)
-+ SingleEndurance        CLDPoiStation (정비소 1종)
+FPGGameInstance          FPGAircraftPawn
+FPGDataRegistry          FlightMovementComponent  ← SimulateMove() 순수 함수
+FPGEventBus              HealthComponent
+FPGGameModeBase          WeaponSlotComponent (기총 + 아이템 2종)
++ SingleEndurance        FPGPoiStation (정비소 1종)
 HUD + 미니맵
 ```
 미룰 것: 예측/화해, RoomSubsystem, SteamService, 팀 로직, 서든데스, 봇 AI
@@ -210,23 +231,22 @@ LMB 무기/아이템 · RMB 락온 / (지도에서) 핑
 
 ### 저장소 받기
 ```bash
-git clone -b claude/steam-airplane-game-design-vp7gu9 \
-  https://github.com/minkyu0617/ST_AIR_POG.git CLOUDLINE
-cd CLOUDLINE
+git clone https://github.com/minkyu0617/ST_AIR_POG.git FPG
+cd FPG
 ```
 
 ### 새 작업 세션 시작 프롬프트 예시
 
 **설계 이어가기**
 ```
-CLOUDLINE.md 와 docs/14_open_questions.md 를 읽고,
+FPG.md 와 docs/14_open_questions.md 를 읽고,
 D-01(엔진 선택)을 결정할 수 있게 Unreal과 Unity의
 장단점을 이 프로젝트 기준으로 비교해줘.
 ```
 
 **개발 착수**
 ```
-CLOUDLINE.md 와 docs/16_architecture.md 를 읽고,
+FPG.md 와 docs/16_architecture.md 를 읽고,
 M1 수직 슬라이스에 필요한 Unreal 프로젝트 골격을 만들어줘.
 FlightMovementComponent 의 SimulateMove() 는
 반드시 순수 함수로 분리해야 해.
@@ -234,13 +254,13 @@ FlightMovementComponent 의 SimulateMove() 는
 
 **문서 수정**
 ```
-CLOUDLINE.md 를 읽고, D-02를 "Q로 변경"으로 확정해서
+FPG.md 를 읽고, D-02를 "Q로 변경"으로 확정해서
 docs/14 와 docs/03 에 반영해줘.
 ```
 
 ### 작업 후 반드시
 - [ ] 결정한 내용을 `docs/14_open_questions.md`에 기록
-- [ ] **이 파일(`CLOUDLINE.md`)의 §1 현재 상태와 §5 다음 할 일 갱신**
+- [ ] **이 파일(`FPG.md`)의 §1 현재 상태와 §5 다음 할 일 갱신**
 - [ ] 커밋 & 푸시
 
 > 📌 **이 문서를 최신으로 유지하는 것이 가장 중요합니다.**
@@ -252,7 +272,7 @@ docs/14 와 docs/03 에 반영해줘.
 
 | 항목 | 확인처 |
 |---|---|
-| `CLOUDLINE` 상표권 | 키프리스 (제9류·제41류) |
+| 게임 제목 후보의 상표권 | 키프리스 (제9류·제41류) + **변리사** |
 | 한-미 조세조약 원천징수율 | **세무사** |
 | 국내 게임물 등급 분류 의무 | **게임물관리위원회 / 게임 전문 법률 자문** |
 | Steam 수수료·대기기간·이미지 규격·할인 규칙 | Steamworks 문서 (**수시 변경됨**) |

@@ -16,17 +16,25 @@
 | **A3** | **밸런스 수치는 코드 밖에** | 출시 후 수백 번 조정합니다 → [10 §10.5](10_tech_stack.md) |
 | **A4** | **UI는 게임플레이를 모르고, 게임플레이는 UI를 모른다** | HUD 하나 바꿀 때 전투 코드가 재컴파일되면 개발 속도가 무너집니다 |
 
-### 이름 규칙
-게임 제목이 **CLOUDLINE**으로 확정되었습니다([14 D-07](14_open_questions.md), 2026-08-01).
+### 이름 규칙 — 코드명과 게임 제목의 분리
+
+**코드는 게임 제목을 몰라야 합니다.** 제목은 마케팅 자산이라 상표 검색 결과나 시장 판단에 따라 바뀔 수 있지만, 코드 접두어가 바뀌면 전체 소스를 건드려야 합니다. 두 이름을 분리해 **제목 변경이 코드에 전혀 영향을 주지 않게** 합니다.
+
+| 구분 | 값 | 확정 시점 | 변경 가능성 |
+|---|---|---|---|
+| **프로젝트 코드명** | **`FPG`** | ✅ 2026-08-02 확정 | **없음 (영구 고정)** |
+| **게임 제목** | 미정 | M4(스토어 페이지 오픈) 전 | 그전까지 자유 |
 
 | 대상 | 규칙 | 예 |
 |---|---|---|
-| 클래스 접두어 | **`CLD`** | `ACLDAircraftPawn`, `UCLDDataRegistry`, `FCLDMove` |
-| 모듈 / 소스 폴더 | `CloudlineGame` | `Source/CloudlineGame/` |
-| `/Script/` 경로 | `CloudlineGame` | `/Script/CloudlineGame.BattleGameMode` |
-| 저장소 | `ST_AIR_POG` (코드명 유지) | 변경하지 않음 — 이력이 끊기고 이득이 없음 |
+| 클래스 접두어 | **`FPG`** | `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
+| 모듈 / 소스 폴더 | `FPGGame` | `Source/FPGGame/` |
+| `/Script/` 경로 | `FPGGame` | `/Script/FPGGame.BattleGameMode` |
+| 저장소 | `ST_AIR_POG` | 변경하지 않음 — 이력이 끊기고 이득이 없음 |
+| 데이터 ID | 대문자 스네이크 | `AIRCRAFT_FALCON`, `ITEM_RAILGUN` |
 
-> 클래스에 `Cloudline`을 전부 붙이면 이름이 길어져 가독성이 떨어집니다. **클래스는 짧은 `CLD`, 모듈은 전체 이름**으로 분리합니다.
+> ⚠️ **게임 제목을 코드·에셋 경로·데이터 ID에 넣지 마십시오.** 제목은 오직 **문자열 테이블과 스토어 자산에만** 존재해야 합니다.
+> 실제로 제목 후보였던 CLOUDLINE이 동명 법인 발견으로 폐기됐고([14 D-07](14_open_questions.md)), 그때 접두어가 `CLD`였다면 전체 소스를 다시 손봐야 했습니다. 이 분리가 그 비용을 0으로 만듭니다.
 
 ---
 
@@ -74,8 +82,8 @@ flowchart TD
 > **R5가 특히 중요합니다.** Steam API를 여기저기서 직접 부르면, 나중에 콘솔 이식이나 오프라인 모드를 넣을 때 손댈 곳이 수십 군데가 됩니다. `SteamService` 한 곳만 갈아끼우면 되도록 막아둡니다.
 
 ### 모듈 분리
-Unreal 모듈은 **처음에 단일 모듈(`CloudlineGame`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
-컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `CloudlineCore` / `CloudlineGame` / `CloudlineUI` 3개로 분리합니다.
+Unreal 모듈은 **처음에 단일 모듈(`FPGGame`)로 시작**하고, 폴더 규율로 의존 방향을 지킵니다.
+컴파일 시간이 문제가 될 때(대략 소스 300개 이상) `FPGCore` / `FPGGame` / `FPGUI` 3개로 분리합니다.
 1인~3인 규모에서 처음부터 모듈을 쪼개는 것은 빌드 설정 관리 비용이 이득보다 큽니다.
 
 ---
@@ -86,13 +94,13 @@ Unreal이 이미 정해둔 뼈대에 우리 게임을 어떻게 얹을지입니�
 
 | Unreal 클래스 | 존재 위치 | 우리 구현 | 담는 것 |
 |---|---|---|---|
-| `GameInstance` | 클라이언트/서버 각각, **레벨 전환에도 유지** | `UCLDGameInstance` | 서비스 소유, 방 상태, 세션 |
-| `GameMode` | **서버에만 존재** | `ACLDGameModeBase` → 모드별 3종 | 규칙, 승패 판정, 부활, 스폰 |
-| `GameState` | 서버 → 전원 복제 | `ACLDGameState` | 남은 시간, 순위, 공역 반경 |
-| `PlayerState` | 서버 → 전원 복제 | `ACLDPlayerState` | 닉네임, 팀, 킬/데스, 순위, 크레딧 |
-| `PlayerController` | **자기 것만 로컬** | `ACLDPlayerController` | 입력, HUD 소유, 핑 RPC |
-| `Pawn` | 서버 → 전원 복제 | `ACLDAircraftPawn` | 기체 본체 |
-| `HUD` / `UserWidget` | 로컬 전용 | `UCLDHUDWidget` 등 | 화면 표시 |
+| `GameInstance` | 클라이언트/서버 각각, **레벨 전환에도 유지** | `UFPGGameInstance` | 서비스 소유, 방 상태, 세션 |
+| `GameMode` | **서버에만 존재** | `AFPGGameModeBase` → 모드별 3종 | 규칙, 승패 판정, 부활, 스폰 |
+| `GameState` | 서버 → 전원 복제 | `AFPGGameState` | 남은 시간, 순위, 공역 반경 |
+| `PlayerState` | 서버 → 전원 복제 | `AFPGPlayerState` | 닉네임, 팀, 킬/데스, 순위, 크레딧 |
+| `PlayerController` | **자기 것만 로컬** | `AFPGPlayerController` | 입력, HUD 소유, 핑 RPC |
+| `Pawn` | 서버 → 전원 복제 | `AFPGAircraftPawn` | 기체 본체 |
+| `HUD` / `UserWidget` | 로컬 전용 | `UFPGHUDWidget` 등 | 화면 표시 |
 
 ### 무엇을 어디에 둘지 — 실수하기 쉬운 지점
 
@@ -113,7 +121,7 @@ Unreal이 이미 정해둔 뼈대에 우리 게임을 어떻게 얹을지입니�
 
 ```mermaid
 classDiagram
-    class ACLDAircraftPawn {
+    class AFPGAircraftPawn {
         +UFlightMovementComponent Movement
         +UHealthComponent Health
         +UWeaponSlotComponent Weapons
@@ -125,8 +133,8 @@ classDiagram
         -float Throttle
         -FRotator Attitude
         -EFlightState State
-        +SimulateMove(FCLDMove, DeltaTime)
-        +GetStateSnapshot() FCLDMoveState
+        +SimulateMove(FFPGMove, DeltaTime)
+        +GetStateSnapshot() FFPGMoveState
     }
     class UWeaponSlotComponent {
         -TArray~FWeaponSlot~ Slots
@@ -141,7 +149,7 @@ classDiagram
         +ApplyDamage(FDamageEvent)
         +OnDeath EventDispatcher
     }
-    class ACLDGameModeBase {
+    class AFPGGameModeBase {
         <<abstract>>
         +CheckWinCondition()*
         +HandlePlayerDeath(PlayerState)*
@@ -151,18 +159,18 @@ classDiagram
     class ABattleGameMode
     class ASingleEnduranceGameMode
 
-    ACLDAircraftPawn *-- UFlightMovementComponent
-    ACLDAircraftPawn *-- UHealthComponent
-    ACLDAircraftPawn *-- UWeaponSlotComponent
-    ACLDAircraftPawn *-- ULockOnComponent
-    ACLDGameModeBase <|-- ASpeedRaceGameMode
-    ACLDGameModeBase <|-- ABattleGameMode
-    ACLDGameModeBase <|-- ASingleEnduranceGameMode
+    AFPGAircraftPawn *-- UFlightMovementComponent
+    AFPGAircraftPawn *-- UHealthComponent
+    AFPGAircraftPawn *-- UWeaponSlotComponent
+    AFPGAircraftPawn *-- ULockOnComponent
+    AFPGGameModeBase <|-- ASpeedRaceGameMode
+    AFPGGameModeBase <|-- ABattleGameMode
+    AFPGGameModeBase <|-- ASingleEnduranceGameMode
 ```
 
 ### 설계 의도
 - **기체는 하나의 클래스뿐입니다.** 기체 8종은 별도 C++ 클래스가 아니라 **DataTable 행 + 메시 + 고유기 클래스**의 조합입니다. 기체를 추가할 때 프로그래머가 필요 없게 만드는 것이 목표입니다.
-- **컴포넌트로 쪼갠 이유**: 적기 AI도 같은 컴포넌트를 재사용합니다. `AEnemyAircraftPawn`은 `ACLDAircraftPawn`을 상속하고 `PlayerController` 대신 `AIController`가 붙을 뿐입니다.
+- **컴포넌트로 쪼갠 이유**: 적기 AI도 같은 컴포넌트를 재사용합니다. `AEnemyAircraftPawn`은 `AFPGAircraftPawn`을 상속하고 `PlayerController` 대신 `AIController`가 붙을 뿐입니다.
 - **GameMode만 모드별로 다릅니다** (A1 요구). 승패 판정·부활·스폰만 갈아끼우면 새 모드가 됩니다.
 
 ---
@@ -176,14 +184,14 @@ classDiagram
 
 ```
 [클라이언트]
-1. 입력 수집 → FCLDMove 구조체 생성 (타임스탬프 + 입력값)
+1. 입력 수집 → FFPGMove 구조체 생성 (타임스탬프 + 입력값)
 2. SimulateMove() 로 즉시 로컬 적용        ← 화면은 지연 없이 반응
-3. FCLDMove 를 미확인 목록(PendingMoves)에 보관
+3. FFPGMove 를 미확인 목록(PendingMoves)에 보관
 4. 서버로 전송
 
 [서버]
 5. 같은 SimulateMove() 실행 (동일 함수!)   ← 결정론 확보의 핵심
-6. 결과 상태(FCLDMoveState)와 처리한 타임스탬프를 회신
+6. 결과 상태(FFPGMoveState)와 처리한 타임스탬프를 회신
 
 [클라이언트]
 7. 회신 상태 vs 그 시점 내 예측값 비교
@@ -249,7 +257,7 @@ stateDiagram-v2
     PostMatch --> [*]: 로비 복귀
 ```
 
-- 상태는 `ACLDGameState::MatchPhase`로 **서버에서만 변경**하고 전원에 복제합니다.
+- 상태는 `AFPGGameState::MatchPhase`로 **서버에서만 변경**하고 전원에 복제합니다.
 - 입력 활성화 시점은 `InProgress` 진입이며, 카운트다운은 [08 §8.4](08_multiplayer_architecture.md)대로 **서버 시각 기준**으로 각자 계산합니다.
 - `Boarding` 단계는 [02 §2.6](02_core_gameplay.md)의 탑승 연출 구간이자 **로딩 편차를 흡수하는 버퍼**입니다.
 
@@ -268,7 +276,7 @@ Alive ──HP≤60──> Damaged ──HP≤30──> Critical ──HP=0─�
 아이템 15종을 `switch` 문으로 처리하면 아이템을 추가할 때마다 여러 파일을 수정하게 됩니다. **데이터와 동작을 분리**합니다.
 
 ```
-FItemRow (DataTable)           UCLDItemEffect (UObject)
+FItemRow (DataTable)           UFPGItemEffect (UObject)
 ├ ItemId, 이름, 등급           ├ Execute(Instigator, Context)  ← 실제 동작
 ├ 데미지, 탄수, 쿨다운          ├ CanExecute()
 ├ 아이콘, VFX, SFX 참조         └ (서브클래스가 종류별 구현)
@@ -282,7 +290,7 @@ void UWeaponSlotComponent::ServerFire_Implementation()
     const FItemRow* Row = DataRegistry->FindItem(Slots[SelectedIndex].ItemId);
     if (!Row || !ConsumeAmmo(SelectedIndex)) return;
 
-    UCLDItemEffect* Effect = GetOrCreateEffect(Row->EffectClass);
+    UFPGItemEffect* Effect = GetOrCreateEffect(Row->EffectClass);
     Effect->Execute(GetOwner(), BuildContext());
 }
 ```
@@ -291,11 +299,11 @@ void UWeaponSlotComponent::ServerFire_Implementation()
 |---|---|
 | CSV에 행 1줄 추가 | 기획자 |
 | 아이콘·VFX 연결 | 아티스트 |
-| `UCLDItemEffect` 서브클래스 1개 | 프로그래머 (기존 효과 재사용 시 **0**) |
+| `UFPGItemEffect` 서브클래스 1개 | 프로그래머 (기존 효과 재사용 시 **0**) |
 
 > 유도미사일/로켓/레일건은 전부 `UProjectileEffect` 하나로 처리되고, 파라미터만 다릅니다. 실제로 새 클래스가 필요한 것은 EMP·차폐 필드처럼 **동작 방식 자체가 다른 것**뿐입니다.
 
-**동일한 패턴을 기체 고유기(`UCLDAbility`)와 POI 상점 항목에도 적용**합니다.
+**동일한 패턴을 기체 고유기(`UFPGAbility`)와 POI 상점 항목에도 적용**합니다.
 
 ---
 
@@ -305,10 +313,10 @@ A4 요구(게임플레이와 UI 분리)의 실현 수단입니다.
 
 ```cpp
 // 게임플레이: 발행만 한다. 누가 듣는지 모른다.
-EventBus->Broadcast(FCLDEvent_Kill{ KillerId, VictimId, WeaponId });
+EventBus->Broadcast(FFPGEvent_Kill{ KillerId, VictimId, WeaponId });
 
 // UI: 구독만 한다. 어디서 오는지 모른다.
-EventBus->Subscribe<FCLDEvent_Kill>(this, &UKillFeedWidget::OnKill);
+EventBus->Subscribe<FFPGEvent_Kill>(this, &UKillFeedWidget::OnKill);
 ```
 
 | 이벤트 | 발행처 | 구독처 |
@@ -330,7 +338,7 @@ EventBus->Subscribe<FCLDEvent_Kill>(this, &UKillFeedWidget::OnKill);
 모든 DataTable 접근을 한 곳으로 모읍니다.
 
 ```cpp
-class UCLDDataRegistry : public UGameInstanceSubsystem
+class UFPGDataRegistry : public UGameInstanceSubsystem
 {
     const FAircraftRow* FindAircraft(FName Id) const;
     const FItemRow*     FindItem(FName Id) const;
@@ -374,39 +382,39 @@ sequenceDiagram
 ## 16.12 폴더 구조 (10번 문서 확장)
 
 ```
-Source/CloudlineGame/
+Source/FPGGame/
 ├── Core/
-│   ├── CLDGameInstance.h/cpp
+│   ├── FPGGameInstance.h/cpp
 │   ├── Services/
-│   │   ├── CLDDataRegistry.*
-│   │   ├── CLDEventBus.*
-│   │   ├── CLDSaveService.*
-│   │   ├── CLDSettingsService.*
-│   │   └── CLDAudioService.*
+│   │   ├── FPGDataRegistry.*
+│   │   ├── FPGEventBus.*
+│   │   ├── FPGSaveService.*
+│   │   ├── FPGSettingsService.*
+│   │   └── FPGAudioService.*
 │   └── Types/                    # 공용 enum, 구조체 (의존 없음)
 ├── Platform/
-│   ├── CLDSteamService.*         # ← Steam API를 아는 유일한 곳
-│   └── CLDTelemetry.*
+│   ├── FPGSteamService.*         # ← Steam API를 아는 유일한 곳
+│   └── FPGTelemetry.*
 ├── Flight/
-│   ├── CLDAircraftPawn.*
+│   ├── FPGAircraftPawn.*
 │   ├── FlightMovementComponent.* # SimulateMove() 순수 함수
-│   ├── FlightTypes.h             # FCLDMove, FCLDMoveState
-│   └── CLDInputHandler.*         # 03번 문서 상태 머신
+│   ├── FlightTypes.h             # FFPGMove, FFPGMoveState
+│   └── FPGInputHandler.*         # 03번 문서 상태 머신
 ├── Combat/
 │   ├── HealthComponent.*  WeaponSlotComponent.*  LockOnComponent.*
-│   ├── Effects/                  # UCLDItemEffect 서브클래스들
+│   ├── Effects/                  # UFPGItemEffect 서브클래스들
 │   ├── Projectiles/
 │   └── Abilities/                # 기체 고유기
 ├── POI/
-│   ├── CLDPoiStation.*  PoiDockingComponent.*  StoreTransaction.*
+│   ├── FPGPoiStation.*  PoiDockingComponent.*  StoreTransaction.*
 ├── Modes/
-│   ├── CLDGameModeBase.*  CLDGameState.*  CLDPlayerState.*  CLDPlayerController.*
+│   ├── FPGGameModeBase.*  FPGGameState.*  FPGPlayerState.*  FPGPlayerController.*
 │   ├── SingleEnduranceGameMode.*  SpeedRaceGameMode.*  BattleGameMode.*
 │   └── Rules/                    # 승패 판정, 부활, 공역 수축
 ├── Net/
-│   ├── CLDRoomSubsystem.*  RoomTypes.h  MatchmakingService.*
+│   ├── FPGRoomSubsystem.*  RoomTypes.h  MatchmakingService.*
 ├── AI/
-│   ├── EnemyAircraftPawn.*  CLDAIController.*  Behaviors/
+│   ├── EnemyAircraftPawn.*  FPGAIController.*  Behaviors/
 ├── World/
 │   ├── CourseSpline.*  CheckpointVolume.*  ProceduralGenerator.*  Hazards/
 └── UI/
@@ -471,7 +479,7 @@ Source/CloudlineGame/
 | AR3 | EventBus 남용으로 흐름 추적 불가 | "게임플레이 → UI" 단방향에만 사용 |
 | AR4 | DataTable 참조 오류가 런타임 크래시로 | `ValidateAll()`을 CI에서 강제 |
 | AR5 | UI가 게임플레이에 직접 의존 | 폴더 간 include 방향 검사 스크립트를 CI에 추가 |
-| ~~AR6~~ | ~~프로젝트 접두어를 늦게 변경~~ | ✅ **해소** — 제목 CLOUDLINE 확정, 접두어 `CLD` 고정 ([14 D-07](14_open_questions.md)) |
+| ~~AR6~~ | ~~프로젝트 접두어를 늦게 변경~~ | ✅ **구조적으로 해소** — 코드명 `FPG`를 게임 제목과 영구 분리. 제목이 바뀌어도 코드 무영향 ([14 D-13](14_open_questions.md)) |
 
 ---
 
@@ -481,16 +489,16 @@ Source/CloudlineGame/
 
 ```
 ✅ 만든다                          ⏸ M3까지 미룬다
-CLDGameInstance                   예측/화해 레이어
-CLDDataRegistry (기체/아이템)       RoomSubsystem
-CLDEventBus                       SteamService
-CLDAircraftPawn                   MatchmakingService
+FPGGameInstance                   예측/화해 레이어
+FPGDataRegistry (기체/아이템)       RoomSubsystem
+FPGEventBus                       SteamService
+FPGAircraftPawn                   MatchmakingService
 FlightMovementComponent           팀 로직
   └ SimulateMove() 순수 함수        서든데스
 HealthComponent                   봇 AI
 WeaponSlotComponent (기총 + 2종)
-CLDGameModeBase + SingleEndurance
-CLDPoiStation (정비소 1종)
+FPGGameModeBase + SingleEndurance
+FPGPoiStation (정비소 1종)
 HUD + 미니맵
 ```
 
