@@ -2,9 +2,12 @@
 
 ## 10.1 엔진 선정
 
-### ✅ 확정: **Unreal Engine 5.6** (D-01, 2026-08-10)
+### ✅ 확정: **Unreal Engine** (D-01, 2026-08-10) — 버전 **5.8** (2026-08-11)
 
-| 평가 축 | Unreal 5.6 | Unity 6 | Godot 4 |
+> **버전 원칙: 착수 시점의 최신 5.x를 따릅니다.** 설계가 특정 마이너 버전에 의존하는 부분은 없습니다.
+> 아래 비교표의 근거(볼류메트릭 구름·리플리케이션·Steam 연동)는 전부 5.x 공통입니다. → [14 D-01](14_open_questions.md)
+
+| 평가 축 | Unreal 5.x | Unity 6 | Godot 4 |
 |---|---|---|---|
 | 하늘/구름 표현 | ✅ **Volumetric Cloud + Sky Atmosphere 내장** | 에셋 구매 필요 | 직접 구현 |
 | 네트워크 리플리케이션 | ✅ **내장, 검증된 예측/보간** | Netcode for GO (성숙도 중) | 미흡 |
@@ -19,7 +22,7 @@
 
 ### 라이선스 비용 비교 (D-01 판단 근거)
 
-| | Unreal 5.6 | Unity 6 |
+| | Unreal 5.x | Unity 6 |
 |---|---|---|
 | 기본 | 무료 | Personal 무료 (매출·펀딩 연 $200K 미만) |
 | 유료 전환 시점 | 누적 총매출 **$100만(≈₩14억) 초과분 5% 로열티** | $200K(≈₩2.8억) 초과 시 **Pro 필수** (약 $2,200/석/년) |
@@ -37,10 +40,10 @@
 
 | 영역 | 선택 |
 |---|---|
-| 엔진 | Unreal Engine 5.6 |
+| 엔진 | Unreal Engine **5.8** |
 | 언어 | C++ (게임플레이 코어) + Blueprint (UI·연출·튜닝) |
 | 렌더링 | Lumen **비활성** / 기본 조명 + 라이트맵. Nanite 지형만 선택 적용 |
-| 네트워크 | UE Replication + Online Subsystem Steam + Steam Datagram Relay |
+| 네트워크 | UE Replication + Steam 온라인 연동 + Steam Datagram Relay ⚠️ |
 | UI | UMG (+ Common UI 플러그인, 게임패드 내비게이션) |
 | 물리 | Chaos (기체는 커스텀 Movement Component, 강체 시뮬 미사용) |
 | 오디오 | MetaSounds + FMOD(선택) |
@@ -50,6 +53,9 @@
 | CI | GitHub Actions (린트/빌드), 주 1회 야간 패키징 |
 | 이슈 | GitHub Issues + Projects |
 | 크래시 리포트 | Unreal Crash Reporter + Sentry(선택) |
+
+> ⚠️ **Steam 연동 플러그인 이름은 착수 시 확인이 필요합니다.** 문서 원안은 `Online Subsystem Steam`(OSSv1) 기준으로 작성됐는데, UE는 `Online Services`(OSSv2) 계열로 이행 중이라 5.8에서 어느 쪽이 표준인지 확인해야 합니다.
+> **다만 어느 쪽이든 Steam Datagram Relay를 지원하므로 "v1.0 서버 고정비 ₩0"이라는 결론은 바뀌지 않습니다.** → [08](08_multiplayer_architecture.md), [14 D-01](14_open_questions.md)
 
 ### Lumen 비활성 결정
 Lumen은 아름답지만 **1080p에서 GTX 1060급 하드웨어의 프레임을 절반으로 떨어뜨립니다.** 이 게임은 고속 비행 게임이라 **60fps가 타협 불가능한 요구사항**이며, Steam 유저 하드웨어 중앙값은 여전히 중급기입니다. 사전 구운 라이팅 + 볼류메트릭 구름만으로 충분히 아름다운 결과를 낼 수 있습니다.
