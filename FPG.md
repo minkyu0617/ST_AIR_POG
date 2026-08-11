@@ -43,6 +43,7 @@
 | 게임 제목 | ⚠️ **미정** — CLOUDLINE 폐기, 후보 재탐색 (M4 전까지) |
 | **밸런스 CSV** | ✅ **12종 배치 완료** (`Config/DataTables/`) — `DT_LevelCurve` 30행 포함 |
 | **Git LFS** | ✅ **설정 완료** (`.gitattributes` + 저장소 로컬 활성화) |
+| **데이터 검증 + CI** | ✅ **`Tools/validate_data.py` 13개 규칙 + GitHub Actions** |
 | **개발 환경** | ✅ **VS 2022 Community + Epic Games Launcher 설치 완료** (2026-08-11) |
 | **Unreal Engine 5.6** | ⏸ **런처 로그인 후 직접 설치** — 계정 로그인이 필요한 단계 |
 | 코드 | ❌ **0줄** — 아직 엔진 프로젝트도 생성 전 |
@@ -189,8 +190,11 @@
 | Android / iOS / Linux | ❌ 해제 | v1.0은 Windows 전용 (docs/01) |
 
 → 이 구성이면 60~80GB 선에서 끝납니다.
-- [ ] `ValidateAll()` 데이터 검증 골격 + CI 연결 (규칙 10종 → `docs/17 §17.14`)
-      착수 시 결정할 것: **CSV `#` 주석을 지원하는 커스텀 로더를 만들 것인가, 규약을 폐기할 것인가**
+- [x] ~~`ValidateAll()` 데이터 검증 골격 + CI 연결~~ → ✅ **선행 구현 완료** (2026-08-11)
+      [`Tools/validate_data.py`](Tools/validate_data.py) — 13개 규칙 검사, GitHub Actions 연동.
+      **CSV 고치면 `py Tools/validate_data.py` 먼저 돌릴 것.** 상세 → [Config/DataTables/README.md](Config/DataTables/README.md)
+- [ ] 엔진 도입 후: 위 규칙을 C++ `UFPGDataRegistry::ValidateAll()`로 이관 + V3·V4·V7 추가
+      결정할 것: **CSV `#` 주석을 지원하는 커스텀 로더를 만들 것인가, 규약을 폐기할 것인가**
 
 ### M1 — 수직 슬라이스 (1.5개월) 🔴 **최중요**
 > 활주로 이륙 → 협곡 비행 → 정비소 1곳 → 결승선. **싱글 전용, 프로그래머 아트 허용.**

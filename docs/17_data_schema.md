@@ -478,3 +478,17 @@ CI와 에디터 시작 시 자동 실행되며, 하나라도 실패하면 **빌�
 | V10 | `ModeMask`가 `SpeedOnly`인 아이템이 전투 드롭 테이블에 없는가 |
 
 > 이 10개 규칙이 **런타임 크래시의 상당 부분을 빌드 단계로 앞당깁니다.** 특히 V3·V4·V7은 "출시 빌드에서만 크래시"라는 최악의 상황을 막습니다.
+
+### 구현 현황 (2026-08-11)
+
+엔진 프로젝트가 생기기 전이라 **[`Tools/validate_data.py`](../Tools/validate_data.py)가 선행 구현**을 맡고 있습니다. [GitHub Actions](../.github/workflows/validate-data.yml)에서 `Config/DataTables/**` 변경 시 자동 실행됩니다.
+
+| 상태 | 규칙 |
+|---|---|
+| ✅ 검사 중 | **V1 · V2 · V5 · V6 · V8 · V9** + V10(대리 검사) |
+| ✅ 추가 검사 | T0(표 존재) · F1(BOM) · C1(`#` 주석) · E1(열거형) · E2(레벨 곡선 정합) · E3(부호) |
+| ⏸ 보류 | **V3 · V4 · V7** — `Content/`·`Localization/` 필요 (M2) |
+
+**엔진 도입 시 할 일**: 위 규칙을 `UFPGDataRegistry::ValidateAll()`로 이관하고 V3·V4·V7을 추가하십시오. 파이썬 스크립트는 CSV를 사람이 편집하는 한 계속 유용하므로(에디터를 안 켜도 검증됨) 폐기하지 말고 **양쪽을 유지**하는 편이 낫습니다.
+
+> V10은 **대리 검사**입니다. 원 규칙은 "전투 드롭 테이블"을 대상으로 하지만 `DT_ItemDropRate`는 아이템별이 아닌 (Context × Grade) 확률표라 직접 검사할 대상이 없습니다. 현재는 `Category=RaceOnly` ↔ `ModeMask=SpeedOnly` 정합성으로 대체하고 있으며, 드롭 로직 구현 시 원 규칙으로 교체하십시오.

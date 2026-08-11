@@ -1,0 +1,37 @@
+name: 밸런스 데이터 검증
+
+# docs/17 §17.14 — "하나라도 실패하면 빌드를 통과시키지 않습니다."
+#
+# 엔진 프로젝트가 생기기 전 단계라 C++ ValidateAll() 대신
+# Tools/validate_data.py가 데이터만으로 판정 가능한 규칙을 검사합니다.
+# 엔진이 들어오면 이 워크플로에 C++ 빌드 + ValidateAll() 실행을 추가하고,
+# 에셋·문자열 테이블이 필요한 V3·V4·V7을 그쪽에서 담당시키십시오.
+
+on:
+  push:
+    paths:
+      - 'Config/DataTables/**'
+      - 'Tools/validate_data.py'
+      - '.github/workflows/validate-data.yml'
+  pull_request:
+    paths:
+      - 'Config/DataTables/**'
+      - 'Tools/validate_data.py'
+      - '.github/workflows/validate-data.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # CSV는 LFS 대상이 아니므로(.gitattributes) LFS 체크아웃이 필요 없습니다.
+          lfs: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 데이터 검증
+        run: python Tools/validate_data.py
