@@ -1,0 +1,42 @@
+# FPG — Unreal Engine 프로젝트
+#
+# ⚠️ Content/ 는 무시하지 않습니다. .uasset/.umap 은 Git LFS로 관리됩니다 (.gitattributes)
+
+# ── 엔진 생성물 (재생성 가능) ────────────────────────────────
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# ── Visual Studio ────────────────────────────────────────────
+# ⚠️ UE 5.8은 솔루션을 .sln이 아니라 .slnx(새 XML 형식)로 생성합니다.
+#    둘 다 UnrealBuildTool -projectfiles 로 언제든 재생성되므로 추적하지 않습니다.
+.vs/
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# .vsconfig 는 무시하지 않습니다 — UBT가 생성하는 "필요한 VS 컴포넌트 목록"이라
+# 새 작업 환경에서 VS가 누락 컴포넌트를 자동으로 안내해 줍니다.
+
+# ── Rider / VS Code ──────────────────────────────────────────
+.idea/
+.vscode/
+*.xcodeproj
+*.xcworkspace
+
+# ── OS ───────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ── Python (Tools/) ──────────────────────────────────────────
+__pycache__/
+*.pyc

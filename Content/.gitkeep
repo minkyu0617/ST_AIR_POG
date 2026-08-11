@@ -1,0 +1,4 @@
+이 파일은 빈 Content/ 폴더를 git에 유지하기 위한 것입니다.
+
+에셋(.uasset/.umap)이 들어오면 지워도 됩니다.
+Content/ 는 .gitignore 대상이 아니며, 에셋은 Git LFS로 관리됩니다 (.gitattributes).
