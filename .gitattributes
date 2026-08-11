@@ -1,0 +1,67 @@
+# FPG — Git 속성 정의
+#
+# 근거: docs/10_tech_stack.md §10.6 (LFS 대상)
+#
+# ⚠️ 새 바이너리 확장자를 추가할 때는 "커밋하기 전에" 여기 먼저 등록하십시오.
+#    이미 일반 파일로 커밋된 뒤에 LFS로 옮기면 히스토리 재작성(git lfs migrate)이
+#    필요하고, 그 시점에 협업자가 있으면 전원이 다시 clone 해야 합니다.
+
+# ── 기본 정책 ────────────────────────────────────────────────
+# 텍스트는 자동 판별하되, 저장소에는 항상 LF로 보관합니다.
+# (Windows 작업 트리에서는 core.autocrlf 설정에 따라 CRLF로 체크아웃됨)
+* text=auto eol=lf
+
+# ── Unreal 에셋 (LFS 필수) ───────────────────────────────────
+*.uasset  filter=lfs diff=lfs merge=lfs -text
+*.umap    filter=lfs diff=lfs merge=lfs -text
+
+# ── 3D / 애니메이션 ──────────────────────────────────────────
+*.fbx     filter=lfs diff=lfs merge=lfs -text
+*.obj     filter=lfs diff=lfs merge=lfs -text
+*.blend   filter=lfs diff=lfs merge=lfs -text
+
+# ── 텍스처 / 이미지 ──────────────────────────────────────────
+*.png     filter=lfs diff=lfs merge=lfs -text
+*.jpg     filter=lfs diff=lfs merge=lfs -text
+*.jpeg    filter=lfs diff=lfs merge=lfs -text
+*.tga     filter=lfs diff=lfs merge=lfs -text
+*.psd     filter=lfs diff=lfs merge=lfs -text
+*.exr     filter=lfs diff=lfs merge=lfs -text
+*.hdr     filter=lfs diff=lfs merge=lfs -text
+
+# ── 오디오 ───────────────────────────────────────────────────
+*.wav     filter=lfs diff=lfs merge=lfs -text
+*.ogg     filter=lfs diff=lfs merge=lfs -text
+*.mp3     filter=lfs diff=lfs merge=lfs -text
+
+# ── 영상 (스토어 트레일러 등) ────────────────────────────────
+*.mp4     filter=lfs diff=lfs merge=lfs -text
+*.mov     filter=lfs diff=lfs merge=lfs -text
+
+# ── 폰트 ─────────────────────────────────────────────────────
+*.ttf     filter=lfs diff=lfs merge=lfs -text
+*.otf     filter=lfs diff=lfs merge=lfs -text
+
+# ── 기타 바이너리 ────────────────────────────────────────────
+*.dll     filter=lfs diff=lfs merge=lfs -text
+*.lib     filter=lfs diff=lfs merge=lfs -text
+*.pdb     filter=lfs diff=lfs merge=lfs -text
+*.zip     filter=lfs diff=lfs merge=lfs -text
+*.7z      filter=lfs diff=lfs merge=lfs -text
+
+# ── 텍스트로 유지할 것 (LFS에 넣지 말 것) ────────────────────
+# 밸런스 CSV는 diff를 읽어야 하므로 절대 LFS로 보내지 않습니다.
+# "탄약 3 → 2" 같은 변경을 리뷰에서 확인할 수 없게 됩니다.
+*.csv     text eol=lf
+*.md      text eol=lf
+*.h       text eol=lf
+*.cpp     text eol=lf
+*.cs      text eol=lf
+*.ini     text eol=lf
+*.json    text eol=lf
+
+# ── 병합 불가 파일 ───────────────────────────────────────────
+# 바이너리 에셋은 3-way 병합이 불가능합니다. 충돌 시 한쪽을 골라야 하며,
+# 실무에서는 편집 전에 팀에 알리는 규칙(또는 파일 잠금)으로 예방합니다.
+*.uasset  -merge
+*.umap    -merge

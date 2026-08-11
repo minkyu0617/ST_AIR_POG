@@ -1,0 +1,4 @@
+Id,Type,NameKey,IconPath,DockSpeedLimit,DockTimeSec,BaseRepairCost,RepairCostMultiplier,BoostRefillCost,AmmoRefillCost
+POI_AIRCRAFT_STORE,AircraftStore,POI_STORE_NAME,/Game/UI/Icons/T_Poi_Store,20000,3.0,0,1.0,0,0
+POI_WEAPON_SHOP,WeaponShop,POI_WEAPON_NAME,/Game/UI/Icons/T_Poi_Weapon,20000,3.0,0,1.0,30,25
+POI_REPAIR_BAY,RepairBay,POI_REPAIR_NAME,/Game/UI/Icons/T_Poi_Repair,20000,3.0,60,1.6,30,0

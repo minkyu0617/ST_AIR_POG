@@ -1,0 +1,9 @@
+Id,NameKey,LevelPath,SupportedModes,LengthMeters,PoiCount,MinPlayers,MaxPlayers,PreviewPath,MusicId
+MAP_CANYON_CORRIDOR,MAP_CANYON_NAME,/Game/Maps/M1_Canyon,SpeedSolo|SpeedTeam,14200,4,2,10,/Game/UI/Preview/T_M1,MUSIC_RACE_A
+MAP_FLOATING_CITY,MAP_CITY_NAME,/Game/Maps/M2_City,SpeedSolo|SpeedTeam,16800,5,2,10,/Game/UI/Preview/T_M2,MUSIC_RACE_B
+MAP_VOLCANO,MAP_VOLCANO_NAME,/Game/Maps/M3_Volcano,SpeedSolo|SpeedTeam,13500,3,2,10,/Game/UI/Preview/T_M3,MUSIC_RACE_A
+MAP_ARCTIC,MAP_ARCTIC_NAME,/Game/Maps/M4_Arctic,SpeedSolo|SpeedTeam,15400,4,2,10,/Game/UI/Preview/T_M4,MUSIC_RACE_C
+MAP_CLOUD_ARENA,MAP_ARENA_NAME,/Game/Maps/M5_Arena,BattleFFA|BattleTeam,0,4,2,10,/Game/UI/Preview/T_M5,MUSIC_BATTLE_A
+MAP_STORM_EYE,MAP_STORM_NAME,/Game/Maps/M6_Storm,BattleFFA|BattleTeam,0,3,2,10,/Game/UI/Preview/T_M6,MUSIC_BATTLE_B
+MAP_AIRBASE,MAP_AIRBASE_NAME,/Game/Maps/M7_Airbase,BattleFFA|BattleTeam,0,4,2,10,/Game/UI/Preview/T_M7,MUSIC_BATTLE_A
+MAP_ENDLESS,MAP_ENDLESS_NAME,/Game/Maps/E1_Endless,SingleEndurance,0,0,1,1,/Game/UI/Preview/T_E1,MUSIC_SINGLE

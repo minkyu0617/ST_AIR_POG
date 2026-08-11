@@ -1,0 +1,5 @@
+Id,Tier,HP,Damage,FireRate,DetectRange,AggroTime,BehaviorTree,SpawnFromKm,CreditReward
+ENEMY_INTERCEPTOR_T1,1,60,5,0.5,120000,8,/Game/AI/BT_Interceptor,5,40
+ENEMY_INTERCEPTOR_T2,2,110,8,0.7,160000,12,/Game/AI/BT_Interceptor,15,60
+ENEMY_INTERCEPTOR_T3,3,180,12,1.0,200000,15,/Game/AI/BT_Ace,30,90
+ENEMY_SAM_SITE,2,250,20,0.3,180000,20,/Game/AI/BT_Static,30,70
