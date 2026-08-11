@@ -22,11 +22,11 @@
 
 ## 🎯 지금 바로 할 일 (요약)
 
-1. ~~D-01 ~ D-04 결정~~ → ✅ **2026-08-10 전부 확정** (엔진 = **Unreal**, 아이템 키 = `Q`, 대칭 롤, 자동 스로틀)
-2. **M0 착수** — Unreal **5.8** 설치 → `FPG` 모듈 프로젝트 생성 → Git LFS ✅ → CSV 배치 ✅ → `ValidateAll()` ✅. 아래 §5
-3. **M1 수직 슬라이스** — 만들 것 목록은 아래 §5
+1. ~~D-01 ~ D-04 결정~~ → ✅ 2026-08-10 확정 (엔진 = **Unreal 5.8**, 아이템 키 = `Q`, 대칭 롤, 자동 스로틀)
+2. ~~**M0**~~ → ✅ **2026-08-11 완료.** 엔진·VS 설치, `FPG` 프로젝트 생성·빌드·기동, Git LFS, CSV 12종, 데이터 검증 CI
+3. 🔴 **M1 수직 슬라이스 착수** ← **지금 여기.** 만들 것 목록은 아래 §5
 
-**막는 것이 아무것도 남지 않았습니다. 바로 M0를 시작하면 됩니다.**
+**M1이 이 프로젝트의 분기점입니다 (P1).** 손맛 검증에 실패하면 중단합니다.
 **게임 제목은 기다리지 마세요.** 코드와 분리돼 있어 개발을 막지 않습니다.
 
 ---
@@ -45,8 +45,9 @@
 | **Git LFS** | ✅ **설정 완료** (`.gitattributes` + 저장소 로컬 활성화) |
 | **데이터 검증 + CI** | ✅ **`Tools/validate_data.py` 13개 규칙 + GitHub Actions** |
 | **개발 환경** | ✅ **VS 2022 Community + Epic Games Launcher 설치 완료** (2026-08-11) |
-| **Unreal Engine 5.8** | ⏸ **미설치** — Epic 로그인은 완료, 엔진 다운로드는 시작 전 |
-| 코드 | ❌ **0줄** — 아직 엔진 프로젝트도 생성 전 |
+| **Unreal Engine 5.8** | ✅ **설치 완료** `D:\UE_5.8` |
+| **`FPG` 프로젝트** | ✅ **생성·빌드·기동 확인 완료** (2026-08-11) — **M0 종료** |
+| 코드 | 🟡 **모듈 골격만** — 게임플레이 코드는 M1부터 |
 | 에셋 | ❌ 없음 |
 | Steam 등록 | ❌ 안 함 |
 | 상표 검색 | ❌ 미확인 — 제목 확정 시 필요 (M4 전) |
@@ -168,7 +169,7 @@
 > ⚠️ 상표 DB(KIPRIS·마크인포 등)는 자동 조회가 차단돼 있어 **사람이 직접** 검색해야 합니다.
 > ⚠️ 제목 미확정이 개발을 막지 않습니다. **M1을 먼저 시작하세요.**
 
-### M0 — 설계 확정 (1개월) ← **진행 중**
+### M0 — 설계 확정 ✅ **완료 (2026-08-11)**
 - [x] ~~Git LFS 설정~~ → ✅ [`.gitattributes`](.gitattributes) 작성 + `git lfs install --local` (2026-08-10)
 - [x] ~~`docs/17`의 CSV를 `Config/DataTables/`에 배치~~ → ✅ **12종 배치 완료** (2026-08-10)
 - [x] ~~**`DT_LevelCurve.csv` 30행 채우기**~~ → ✅ **완료** (2026-08-11, D-14). 총 88,340 XP ≈ 40~44시간.
@@ -176,13 +177,24 @@
 - [x] ~~**Visual Studio 2022 설치**~~ → ✅ Community 17.14.37516 · MSVC 14.44.35207 · Win SDK 22621/26100 · .NET 9.0.316
       워크로드: `NativeGame` `NativeDesktop` `ManagedDesktop`. UE IDE 지원(UnrealEngineTools·CodeLens·Blueprint 디버깅)은 `NativeGame`에 포함됨
 - [x] ~~**Epic Games Launcher 설치**~~ → ✅ `C:\Program Files\Epic Games\` (v1.3.193.0)
-- [ ] 🔴 **Unreal Engine 5.8 설치** — 런처 로그인 후 직접 진행 (아래 옵션표 참조)
-- [ ] **툴체인 확인** — 임시 C++ 프로젝트를 만들어 컴파일 성공 + 에디터 기동까지 확인.
-      여기서 막히면 원인이 엔진인지 VS인지 구분이 안 되므로 `FPG` 생성 **전에** 볼 것
-- [ ] C++ 빈 프로젝트 생성 — **모듈명 `FPG`**, 소스 경로 `Source/FPG/` (제목 넣지 말 것)
-- [ ] 플러그인 활성화: Steam 온라인 연동, Common UI, MetaSounds
-      ⚠️ 5.8의 Steam 연동이 기존 `Online Subsystem Steam`인지 `Online Services`(OSSv2)인지 확인 필요 → docs/08
-- [ ] Lumen **비활성** 확인 (docs/10 §10.2 — 최소 사양 60fps가 타협 불가)
+- [x] ~~**Unreal Engine 5.8 설치**~~ → ✅ `D:\UE_5.8` · `++UE5+Release-5.8-CL-56057345` · 42.6GB
+      ⚠️ Android 타깃이 딸려 들어옴 — 런처 옵션에서 제거하면 몇 GB 회수됨
+- [x] ~~**C++ 프로젝트 생성**~~ → ✅ **모듈명 `FPG`, 저장소 루트에 직접 생성** (docs/10 §10.4 구조 그대로)
+- [x] ~~**툴체인 확인**~~ → ✅ 빌드 성공 57초 (MSVC 14.44 + Win SDK 22621) · 에디터 기동 25.5초
+- [x] ~~Lumen **비활성**~~ → ✅ `Config/DefaultEngine.ini`에 반영 (아래 표)
+- [ ] 플러그인 활성화 — **M1 착수 시점에** 필요한 것만.
+      지금은 템플릿 기본값(`ModelingToolsEditorMode`)만. 켜는 방법은 `Source/FPG/FPG.Build.cs` 주석 참조
+      · UI 작업 시작 시: `Slate` `SlateCore` `UMG` `CommonUI`
+      · 멀티(M3) 시작 시: `OnlineSubsystem` `OnlineSubsystemUtils` + `.uproject`에 `OnlineSubsystemSteam`
+
+#### `Config/DefaultEngine.ini`에 넣은 설정 (템플릿과 다른 것)
+| 설정 | 값 | 근거 |
+|---|---|---|
+| `r.AllowStaticLighting` | `True` | 템플릿은 `False`. 라이트맵을 쓰려면 필수 (docs/10 §10.2) |
+| `r.DynamicGlobalIlluminationMethod` | `0` | Lumen 비활성 |
+| `r.ReflectionMethod` | `2` | 스크린 스페이스 반사 |
+| `r.Shadow.Virtual.Enable` | `0` | ⚠️ **문서에 명시 없는 판단.** VSM은 Lumen·Nanite와 짝인 기능이라 정적 라이팅 + 최소사양 60fps와 안 맞음. 되돌리려면 `1` |
+| `NetServerMaxTickRate` | `30` | docs/17 §17.10 서버 틱 30Hz. M1은 싱글이지만 P3·P4 때문에 미리 맞춤 |
 
 #### 엔진 설치 옵션 (런처에서 선택)
 | 항목 | 설정 | 이유 |
