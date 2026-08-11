@@ -3,6 +3,10 @@
 > [16번 문서](16_architecture.md)가 **"코드를 어떻게 나눌 것인가"** 라면, 이 문서는 **"데이터를 어떤 모양으로 담을 것인가"** 입니다.
 > 여기 정의된 CSV는 그대로 `Config/DataTables/`에 넣어 개발을 시작할 수 있습니다.
 
+> ✅ **2026-08-10 — 실제 배치 완료.** 아래 12개 표가 [`Config/DataTables/`](../Config/DataTables/)에 파일로 존재합니다.
+> 배치 과정에서 확인된 **미해결 공백 3건**과 파일 규약은 [`Config/DataTables/README.md`](../Config/DataTables/README.md)에 정리돼 있습니다.
+> 이 문서와 실제 파일이 어긋나면 **파일이 아니라 이 문서를 먼저 고치십시오** — 스키마의 정본은 여기입니다.
+
 ---
 
 ## 17.1 공통 규약
@@ -14,10 +18,14 @@
 | ID 형식 | `대문자_스네이크` (예: `AIRCRAFT_FALCON`, `ITEM_GUIDED_MISSILE`) |
 | 참조 무결성 | 다른 표의 ID를 참조하는 열은 `ValidateAll()`이 검사 → [16 §16.10](16_architecture.md) |
 | 표시 문자열 | **CSV에 넣지 않는다.** ID만 두고 실제 문구는 문자열 테이블에서 (다국어 대응) |
-| 주석 | `#`으로 시작하는 행은 무시 |
+| 주석 | `#`으로 시작하는 행은 무시 — ⚠️ **커스텀 로더 필요.** 아래 참조 |
 | 시간 단위 | 초(sec), 거리 단위 | 언리얼 유닛(1 UU = 1 cm) |
 
 > **표시 문자열 분리가 중요합니다.** `Name` 열에 "유도 미사일"을 직접 쓰면 영어판을 만들 때 표를 통째로 복제해야 합니다. `NameKey=ITEM_GUIDED_MISSILE_NAME`만 두고 번역은 별도 관리합니다.
+
+> ⚠️ **`#` 주석 규약은 아직 구현 근거가 없습니다.** 언리얼 **내장** DataTable CSV 임포터는 첫 행을 무조건 헤더로 읽으므로, 선행 `#` 행이 있으면 임포트가 깨집니다.
+> 그래서 `Config/DataTables/`의 실제 파일에는 **주석 행을 넣지 않았습니다.** 이 문서 코드 블록 첫 줄의 `# DT_Aircraft.csv`는 파일 이름 라벨이지 파일 내용이 아닙니다.
+> 주석을 실제로 지원하려면 커스텀 로더가 필요합니다. `ValidateAll()` 구현 시점에 "커스텀 로더를 만들 것인가 / 주석 규약을 폐기할 것인가"를 결정하고 [14번 문서](14_open_questions.md)에 기록하십시오.
 
 ---
 
@@ -61,8 +69,12 @@ enum class EAltitudeLayer:uint8 { Canyon, CloudSea, Skyport, Stratos };
 | `UnlockLevel` | int | 0 = 기본 제공 |
 | `StorePrice_Same` / `StorePrice_Upgrade` | int | 경기 중 교체 비용 |
 
+> ⚠️ 아래 예시는 가독성을 위해 `DescKey` / `MeshPath` / `IconPath`를 생략했었습니다.
+> **실제 파일에는 세 열이 포함되어 있고 값은 비어 있습니다**(에셋 미존재). 위 열 정의가 정본입니다.
+> → V4 검증은 **"비어 있지 않으면 존재해야 한다"**로 구현하십시오. 무조건 존재로 만들면 M1 내내 빌드가 실패합니다.
+
 ```csv
-# DT_Aircraft.csv
+# DT_Aircraft.csv (열 3개 생략된 축약형 — 실제 파일은 Config/DataTables/ 참조)
 Id,NameKey,Speed,Accel,Turn,Durability,BoostPower,BaseHP,MaxSpeed,MinSpeed,BoostSpeed,RollRate,PitchRate,YawRate,BoostDuration,BoostCooldown,ExtraItemSlots,AbilityClass,UnlockLevel,StorePrice_Same,StorePrice_Upgrade
 AIRCRAFT_FALCON,AIRCRAFT_FALCON_NAME,20,20,20,20,20,100,260,70,380,140,50,65,3.0,8.0,0,,0,150,300
 AIRCRAFT_DART,AIRCRAFT_DART_NAME,32,24,14,12,18,70,310,85,430,120,44,52,3.0,8.5,0,/Game/Abilities/BP_AfterburnerDash.BP_AfterburnerDash_C,0,150,300
@@ -201,18 +213,24 @@ XP_NEW_RECORD,200
 XP_DAILY_FIRST_WIN,300
 ```
 
-```csv
-# DT_LevelCurve.csv — 레벨 1~30, 누적 40시간 목표
-Level,RequiredXP,CumulativeXP
-1,0,0
-2,400,400
-3,500,900
-5,750,2400
-10,1600,10500
-16,2900,29800
-22,4300,60900
-30,6500,128000
-```
+`DT_LevelCurve.csv` — 레벨 1~30, 누적 40시간 목표. **30행 전체는 [실제 파일](../Config/DataTables/DT_LevelCurve.csv)에 있습니다.** 아래는 형태 요약입니다.
+
+| 구간 | 평균 XP/레벨 | 구간 총 XP | 총량 대비 |
+|---|---|---|---|
+| 초반 L2~L10 | 941 | 8,470 | 9.6% |
+| 중반 L11~L20 | 2,775 | 27,750 | 31.4% |
+| 후반 L21~L30 | 5,212 | 52,120 | **59.0%** |
+| **전체 L1~L30** | | **88,340** | 100% |
+
+앵커 값 (변경 금지 — 이 7개를 고정하고 나머지를 보간했습니다):
+`L2=400` `L3=500` `L5=750` `L10=1600` `L16=2900` `L22=4300` `L30=6500`
+
+> ✅ **2026-08-11 (D-14) — 이전 표본의 `CumulativeXP` 열은 폐기되었습니다.**
+> 구 표본은 `RequiredXP`와 `CumulativeXP`가 서로 모순이었습니다(구간 평균 필요 XP가 그 구간 마지막 레벨 요구량보다 큼 → 우상향 곡선 성립 불가).
+> **"누적 40시간" 목표와의 정합성**을 기준으로 `RequiredXP`를 채택했습니다. 구 `CumulativeXP`(총 128,000)는 약 58~64시간으로 목표를 초과했고, 재계산값(88,340)은 약 40~44시간입니다. → [14 D-14](14_open_questions.md)
+>
+> ⚠️ **시간 환산은 추정치입니다** (1판 ≈ 187 XP, 6분/판 → 약 2,000 XP/시간). 승률·킬 수 가정이 미검증이므로 **M1 텔레메트리(`match_end`)로 교정**하십시오.
+> 교정 시 **곡선 형태는 유지하고 `DT_Progression`의 획득량을 조정**하는 편이 안전합니다 — 곡선을 건드리면 `UnlockLevel` 참조가 전부 흔들립니다.
 
 ```csv
 # DT_ItemDropRate.csv — 역전 보정 (06 §6.4)
