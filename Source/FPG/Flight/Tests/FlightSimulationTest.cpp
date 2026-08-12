@@ -228,7 +228,15 @@ bool FFPGFlightRulesTest::RunTest(const FString&)
 		TestTrue(TEXT("스톨: 저속이 1.5초 지속되면 진입해야 합니다"), S.State == EFlightState::Stall);
 
 		// 회복: 속도가 StallRecoverSpeed를 넘으면 즉시 해제되어야 합니다.
+		//
+		// Throttle을 1로 함께 맞춰 목표 속도를 최고 속도로 둡니다. 그러지 않으면
+		// (스톨 루프 동안 입력이 없어 Throttle이 0에 가까운 채로 남아 있어)
+		// 이 한 프레임에서 감속(DecelBrake)이 걸려, 직접 세팅한 속도가 같은
+		// 프레임 안에 회복 임계선 아래로 다시 떨어질 수 있습니다 — 시뮬레이션
+		// 결함이 아니라 "속도만 세팅하고 조종사는 손을 놓고 있다"는 시나리오의
+		// 산물이라 이 테스트의 의도(회복 판정 자체)와 무관합니다.
 		S.Velocity = FVector::ForwardVector * (SP.StallRecoverSpeed + 20.f);
+		S.Throttle = 1.f;
 		S = UFlightMovementComponent::Step(S, SP, MakeMove(999, static_cast<uint8>(EF::Thrust)), FixedDt);
 		TestTrue(TEXT("스톨: 속도를 회복하면 즉시 해제되어야 합니다"), S.State != EFlightState::Stall);
 	}

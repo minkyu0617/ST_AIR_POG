@@ -50,9 +50,18 @@ void AFPGAircraftPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// PlayerStart의 pitch/roll을 무시하고 항상 수평 비행 자세로 시작합니다.
+	// 그대로 두면 스폰 지점의 회전을 물려받는데, PlayerStart가 아래를 보는
+	// 각도로 놓여 있으면 카메라도 그대로 아래를 보게 됩니다 — "이동 중인지
+	// 몰랐다"는 혼란의 원인. Yaw(진행 방향)만 스폰 값을 존중하고 Pitch/Roll은
+	// 0으로 강제합니다.
+	const FRotator SpawnRotator = GetActorRotation();
+	const FRotator LevelRotator(0.f, SpawnRotator.Yaw, 0.f);
+	SetActorRotation(LevelRotator);
+
 	// TODO(M1): DT_Aircraft·DT_Flight에서 읽어 SetParams()로 주입해야 합니다. (P5)
 	//           FPGDataRegistry가 생기기 전까지는 FFPGFlightParams의 기본값으로 납니다.
-	Movement->ResetToCruise(GetActorLocation(), GetActorQuat());
+	Movement->ResetToCruise(GetActorLocation(), LevelRotator.Quaternion());
 }
 
 void AFPGAircraftPawn::Tick(float DeltaSeconds)

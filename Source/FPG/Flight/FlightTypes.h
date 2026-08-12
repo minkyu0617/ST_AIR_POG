@@ -149,35 +149,43 @@ struct FFPGFlightParams
 {
 	GENERATED_BODY()
 
+	// ⚠️ 단위 스케일 정정 (2026-08-12, 실기 테스트로 발견 → docs/14 D-16)
+	// 1 UU = 1cm (언리얼 기본 규약). docs/02 §2.2의 원안 수치(180 등)를
+	// 그대로 UU/s로 쓰면 순항 속도가 6.48km/h(도보 속도)가 됩니다.
+	// docs/02가 명시한 목표 체감(180 → 648km/h)은 180 "m/s"를 의미했던
+	// 것으로 보이며(180×3.6=648이 정확히 들어맞음), 그래서 거리 계열 값을
+	// 전부 ×100 했습니다. 각도(°/s)·시간(s)·퍼센트 계열은 스케일과
+	// 무관하므로 그대로 둡니다.
+
 	// ── DT_Aircraft (기체별) ─────────────────────────────────
-	UPROPERTY() float MinSpeed = 70.f;
-	UPROPERTY() float MaxSpeed = 260.f;
-	UPROPERTY() float BoostSpeed = 380.f;
-	UPROPERTY() float RollRate = 140.f;          // °/s
+	UPROPERTY() float MinSpeed = 7000.f;
+	UPROPERTY() float MaxSpeed = 26000.f;
+	UPROPERTY() float BoostSpeed = 38000.f;
+	UPROPERTY() float RollRate = 140.f;          // °/s — 스케일 무관
 	UPROPERTY() float PitchRate = 50.f;          // °/s
 	UPROPERTY() float YawRate = 65.f;            // °/s
 	UPROPERTY() float BoostDuration = 3.f;
 	UPROPERTY() float BoostCooldown = 8.f;
 
 	// ── DT_Flight (기체 공통) ────────────────────────────────
-	UPROPERTY() float CruiseSpeed = 180.f;
-	UPROPERTY() float AccelThrust = 55.f;        // u/s²
-	UPROPERTY() float DecelBrake = 75.f;         // u/s²
-	UPROPERTY() float ThrottleRate = 0.55f;      // 1/s
+	UPROPERTY() float CruiseSpeed = 18000.f;
+	UPROPERTY() float AccelThrust = 5500.f;      // u/s²
+	UPROPERTY() float DecelBrake = 7500.f;       // u/s²
+	UPROPERTY() float ThrottleRate = 0.55f;      // 1/s — 스케일 무관
 	UPROPERTY() float RollMaxAngle = 75.f;       // °
 	UPROPERTY() float BankTurnRateAt30 = 12.f;   // °/s
 	UPROPERTY() float BankTurnRateAt75 = 34.f;   // °/s
 	UPROPERTY() float AttitudeInertiaSec = 0.3f;
-	UPROPERTY() float SpeedLossRollPct = 3.f;    // %/s
+	UPROPERTY() float SpeedLossRollPct = 3.f;    // %/s — 스케일 무관
 	UPROPERTY() float SpeedLossVectorPct = 12.f; // %/s
 	UPROPERTY() float SpeedLossMaxPct = 18.f;    // %/s
-	UPROPERTY() float DiveAccelBonus = 25.f;     // u/s² @ 기준 피치
+	UPROPERTY() float DiveAccelBonus = 2500.f;   // u/s² @ 기준 피치
 	UPROPERTY() float DiveAccelRefPitch = 45.f;  // °
-	UPROPERTY() float StallSpeed = 70.f;
+	UPROPERTY() float StallSpeed = 7000.f;
 	UPROPERTY() float StallEnterSec = 1.5f;
-	UPROPERTY() float StallRecoverSpeed = 100.f;
+	UPROPERTY() float StallRecoverSpeed = 10000.f;
 	UPROPERTY() float StallInputScale = 0.4f;
 	UPROPERTY() float StallNoseDownRate = 25.f;  // °/s
-	UPROPERTY() float AltitudeCeilingM = 12000.f;
+	UPROPERTY() float AltitudeCeilingM = 12000.f;      // 이미 m 단위 — 변경 없음
 	UPROPERTY() float AltitudeCeilingPowerMult = 0.6f;
 };

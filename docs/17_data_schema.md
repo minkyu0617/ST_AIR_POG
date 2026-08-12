@@ -73,15 +73,17 @@ enum class EAltitudeLayer:uint8 { Canyon, CloudSea, Skyport, Stratos };
 > **실제 파일에는 세 열이 포함되어 있고 값은 비어 있습니다**(에셋 미존재). 위 열 정의가 정본입니다.
 > → V4 검증은 **"비어 있지 않으면 존재해야 한다"**로 구현하십시오. 무조건 존재로 만들면 M1 내내 빌드가 실패합니다.
 
+> ⚠️ **속도 계열 열(`MaxSpeed`/`MinSpeed`/`BoostSpeed`)은 2026-08-12에 ×100 정정되었습니다.** 아래 예시는 정정 반영본입니다. 근거는 [D-16](14_open_questions.md)을 참조하십시오.
+
 ```csv
 # DT_Aircraft.csv (열 3개 생략된 축약형 — 실제 파일은 Config/DataTables/ 참조)
 Id,NameKey,Speed,Accel,Turn,Durability,BoostPower,BaseHP,MaxSpeed,MinSpeed,BoostSpeed,RollRate,PitchRate,YawRate,BoostDuration,BoostCooldown,ExtraItemSlots,AbilityClass,UnlockLevel,StorePrice_Same,StorePrice_Upgrade
-AIRCRAFT_FALCON,AIRCRAFT_FALCON_NAME,20,20,20,20,20,100,260,70,380,140,50,65,3.0,8.0,0,,0,150,300
-AIRCRAFT_DART,AIRCRAFT_DART_NAME,32,24,14,12,18,70,310,85,430,120,44,52,3.0,8.5,0,/Game/Abilities/BP_AfterburnerDash.BP_AfterburnerDash_C,0,150,300
-AIRCRAFT_BASTION,AIRCRAFT_BASTION_NAME,14,14,16,38,18,140,220,60,330,110,42,55,3.0,8.0,0,/Game/Abilities/BP_TempArmor.BP_TempArmor_C,5,150,350
-AIRCRAFT_WHISPER,AIRCRAFT_WHISPER_NAME,18,18,36,14,14,75,245,62,355,190,72,95,2.5,9.0,0,/Game/Abilities/BP_SnapTurn.BP_SnapTurn_C,8,150,400
-AIRCRAFT_HAULER,AIRCRAFT_HAULER_NAME,16,16,18,28,22,120,230,65,345,115,46,58,3.5,7.5,1,,12,150,450
-AIRCRAFT_COMET,AIRCRAFT_COMET_NAME,24,18,16,12,30,70,275,72,410,125,46,60,4.0,4.0,0,,16,150,500
+AIRCRAFT_FALCON,AIRCRAFT_FALCON_NAME,20,20,20,20,20,100,26000,7000,38000,140,50,65,3.0,8.0,0,,0,150,300
+AIRCRAFT_DART,AIRCRAFT_DART_NAME,32,24,14,12,18,70,31000,8500,43000,120,44,52,3.0,8.5,0,/Game/Abilities/BP_AfterburnerDash.BP_AfterburnerDash_C,0,150,300
+AIRCRAFT_BASTION,AIRCRAFT_BASTION_NAME,14,14,16,38,18,140,22000,6000,33000,110,42,55,3.0,8.0,0,/Game/Abilities/BP_TempArmor.BP_TempArmor_C,5,150,350
+AIRCRAFT_WHISPER,AIRCRAFT_WHISPER_NAME,18,18,36,14,14,75,24500,6200,35500,190,72,95,2.5,9.0,0,/Game/Abilities/BP_SnapTurn.BP_SnapTurn_C,8,150,400
+AIRCRAFT_HAULER,AIRCRAFT_HAULER_NAME,16,16,18,28,22,120,23000,6500,34500,115,46,58,3.5,7.5,1,,12,150,450
+AIRCRAFT_COMET,AIRCRAFT_COMET_NAME,24,18,16,12,30,70,27500,7200,41000,125,46,60,4.0,4.0,0,,16,150,500
 AIRCRAFT_VEX,AIRCRAFT_VEX_NAME,20,20,22,16,22,85,260,70,385,145,52,68,3.0,8.0,0,/Game/Abilities/BP_GunBoost.BP_GunBoost_C,22,150,550
 AIRCRAFT_ZENITH,AIRCRAFT_ZENITH_NAME,26,16,20,16,22,85,285,68,395,130,48,62,3.0,8.0,0,/Game/Abilities/BP_HighAltitude.BP_HighAltitude_C,30,150,600
 ```
@@ -139,20 +141,22 @@ ITEM_RANK_STEAL,RaceOnly,Epic,/Game/Effects/BP_RankSwap.BP_RankSwap_C,0,1,0,0,0,
 `DT_Aircraft`는 **기체별** 값이고, 이 표는 **모든 기체가 공유하는** 비행 상수입니다.
 `SimulateMove()`가 참조하는 값이 전부 여기 있으며, 검증 규칙 **E4**가 코드와 표의 키가 정확히 일치하는지 양방향으로 검사합니다.
 
+> ⚠️ **속도 계열 값은 2026-08-12에 ×100 정정되었습니다** (실기 테스트로 발견 — 순항 속도가 도보 속도로 나옴). 각도(°/s)·시간(s)·퍼센트 값은 스케일과 무관해 그대로입니다. → [14 D-16](14_open_questions.md)
+
 | 키 | 값 | 출처 |
 |---|---|---|
-| `CRUISE_SPEED` | 180 | [02 §2.2](02_core_gameplay.md) |
-| `ACCEL_THRUST` / `DECEL_BRAKE` | 55 / 75 | 〃 |
+| `CRUISE_SPEED` | **18,000** | [02 §2.2](02_core_gameplay.md) |
+| `ACCEL_THRUST` / `DECEL_BRAKE` | **5,500** / **7,500** | 〃 |
 | `THROTTLE_RATE` | 0.55 | 신규 — 스로틀 0→1 소요 시간 |
 | `ROLL_MAX_ANGLE` | 75 | [02 §2.2](02_core_gameplay.md) |
 | `BANK_TURN_RATE_AT_30DEG` / `_AT_75DEG` | 12 / 34 | [03 C-1](03_controls_input_spec.md) (D-03) |
 | `ATTITUDE_INERTIA_SEC` | 0.3 | [02 §2.2](02_core_gameplay.md) 원칙2 (0.2~0.4) |
 | `SPEED_LOSS_ROLL_PCT` / `_VECTOR_PCT` / `_MAX_PCT` | 3 / 12 / 18 | [03 C-1](03_controls_input_spec.md), [02 §2.2](02_core_gameplay.md) |
-| `DIVE_ACCEL_BONUS` / `_REF_PITCH` | 25 / 45 | [02 §2.2](02_core_gameplay.md) |
-| `STALL_*` 5종 | 70 / 1.5 / 100 / 0.4 / 25 | 〃 ⚠️ **D-15 참조** |
-| `ALTITUDE_CEILING_M` / `_POWER_MULT` | 12000 / 0.6 | 〃 |
+| `DIVE_ACCEL_BONUS` / `_REF_PITCH` | **2,500** / 45 | [02 §2.2](02_core_gameplay.md) |
+| `STALL_*` 5종 | **7,000** / 1.5 / **10,000** / 0.4 / 25 | 〃 ⚠️ **D-15 참조** |
+| `ALTITUDE_CEILING_M` / `_POWER_MULT` | 12000 / 0.6 | 〃 (이미 m 단위 — 정정 대상 아님) |
 
-> ⚠️ **`STALL_*` 수치로는 스톨에 도달할 수 없습니다.** 감속 하한(70)이 스톨 임계와 같고, 상승 페널티 최대치가 추력 가속을 이기지 못합니다. → [14 D-15](14_open_questions.md)
+> ⚠️ **`STALL_*` 수치로는 스톨에 도달할 수 없습니다.** 감속 하한(7,000)이 스톨 임계와 같고, 상승 페널티 최대치가 추력 가속을 이기지 못합니다. 단위 정정과 무관하게 두 값이 같은 비율로 커졌을 뿐이라 이 결론은 그대로입니다. → [14 D-15](14_open_questions.md)
 
 > `DIVE_ACCEL_BONUS`는 문서상 **강하 보너스**로만 정의돼 있으나, [02 §2.2](02_core_gameplay.md) 원칙3("급기동하면 속도를 잃고, 강하하면 속도를 얻는다")이 교환을 전제하므로 구현에서는 **상승에도 대칭으로** 적용합니다.
 
