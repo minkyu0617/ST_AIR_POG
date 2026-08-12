@@ -14,12 +14,13 @@ AFPGCityBlockGenerator::AFPGCityBlockGenerator()
 	Buildings = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Buildings"));
 	Buildings->SetupAttachment(SceneRoot);
 	Buildings->SetMobility(EComponentMobility::Static);
-	Buildings->SetCollisionProfileName(TEXT("BlockAll"));   // docs/02 §2.4 정적 지형 해저드
+	// 실제 충돌 프로파일은 GenerateCity()에서 bEnableCollision에 따라 매번 설정합니다.
+	Buildings->SetCollisionProfileName(TEXT("NoCollision"));
 
 	Towers = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Towers"));
 	Towers->SetupAttachment(SceneRoot);
 	Towers->SetMobility(EComponentMobility::Static);
-	Towers->SetCollisionProfileName(TEXT("BlockAll"));
+	Towers->SetCollisionProfileName(TEXT("NoCollision"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (CubeMesh.Succeeded())
@@ -44,6 +45,12 @@ void AFPGCityBlockGenerator::GenerateCity()
 {
 	Buildings->ClearInstances();
 	Towers->ClearInstances();
+
+	// bEnableCollision 기본값은 false — 시각 전용 배경입니다. 켤 때는 헤더의
+	// 경고 주석을 먼저 읽으십시오 (docs/02 §2.4 인지 거리 규칙 미준수).
+	const FName Profile = bEnableCollision ? TEXT("BlockAll") : TEXT("NoCollision");
+	Buildings->SetCollisionProfileName(Profile);
+	Towers->SetCollisionProfileName(Profile);
 
 	UStaticMesh* CubeAsset = Buildings->GetStaticMesh();
 	UStaticMesh* CylinderAsset = Towers->GetStaticMesh();
