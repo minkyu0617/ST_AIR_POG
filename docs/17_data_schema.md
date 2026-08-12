@@ -134,6 +134,30 @@ ITEM_RANK_STEAL,RaceOnly,Epic,/Game/Effects/BP_RankSwap.BP_RankSwap_C,0,1,0,0,0,
 
 ---
 
+## 17.4-b DT_Flight — 기체 공통 비행 수치 (2026-08-12 신설)
+
+`DT_Aircraft`는 **기체별** 값이고, 이 표는 **모든 기체가 공유하는** 비행 상수입니다.
+`SimulateMove()`가 참조하는 값이 전부 여기 있으며, 검증 규칙 **E4**가 코드와 표의 키가 정확히 일치하는지 양방향으로 검사합니다.
+
+| 키 | 값 | 출처 |
+|---|---|---|
+| `CRUISE_SPEED` | 180 | [02 §2.2](02_core_gameplay.md) |
+| `ACCEL_THRUST` / `DECEL_BRAKE` | 55 / 75 | 〃 |
+| `THROTTLE_RATE` | 0.55 | 신규 — 스로틀 0→1 소요 시간 |
+| `ROLL_MAX_ANGLE` | 75 | [02 §2.2](02_core_gameplay.md) |
+| `BANK_TURN_RATE_AT_30DEG` / `_AT_75DEG` | 12 / 34 | [03 C-1](03_controls_input_spec.md) (D-03) |
+| `ATTITUDE_INERTIA_SEC` | 0.3 | [02 §2.2](02_core_gameplay.md) 원칙2 (0.2~0.4) |
+| `SPEED_LOSS_ROLL_PCT` / `_VECTOR_PCT` / `_MAX_PCT` | 3 / 12 / 18 | [03 C-1](03_controls_input_spec.md), [02 §2.2](02_core_gameplay.md) |
+| `DIVE_ACCEL_BONUS` / `_REF_PITCH` | 25 / 45 | [02 §2.2](02_core_gameplay.md) |
+| `STALL_*` 5종 | 70 / 1.5 / 100 / 0.4 / 25 | 〃 ⚠️ **D-15 참조** |
+| `ALTITUDE_CEILING_M` / `_POWER_MULT` | 12000 / 0.6 | 〃 |
+
+> ⚠️ **`STALL_*` 수치로는 스톨에 도달할 수 없습니다.** 감속 하한(70)이 스톨 임계와 같고, 상승 페널티 최대치가 추력 가속을 이기지 못합니다. → [14 D-15](14_open_questions.md)
+
+> `DIVE_ACCEL_BONUS`는 문서상 **강하 보너스**로만 정의돼 있으나, [02 §2.2](02_core_gameplay.md) 원칙3("급기동하면 속도를 잃고, 강하하면 속도를 얻는다")이 교환을 전제하므로 구현에서는 **상승에도 대칭으로** 적용합니다.
+
+---
+
 ## 17.5 DT_Module — 부품
 
 ```csv
@@ -391,6 +415,7 @@ USTRUCT()
 struct FFPGMove
 {
     float   ClientTimestamp;
+    float   DeltaTime;       // ★ 2026-08-12 추가
     uint8   InputFlags;      // 비트: W,A,S,D,Space,Ctrl,Fire
     FVector2D AimDelta;      // 마우스 델타
     uint8   SelectedSlot;
@@ -406,6 +431,8 @@ struct FFPGMoveState
     FVector_NetQuantize100 Velocity;
     float     Throttle;
     float     BoostRemaining;
+    float     BoostCooldownRemaining;  // ★ 2026-08-12 추가
+    float     StallSeconds;            // ★ 2026-08-12 추가
     EFlightState State;
 };
 ```
@@ -413,6 +440,14 @@ struct FFPGMoveState
 - `InputFlags`를 **비트 플래그로 압축**해 60Hz 전송의 대역폭을 줄입니다.
 - `FVector_NetQuantize100`은 cm 단위 정밀도로 압축 전송하는 Unreal 내장 타입입니다.
 - **`FFPGMove`에 위치를 넣지 않습니다.** 위치를 클라이언트가 보내면 텔레포트핵이 가능해집니다. **입력만 보내고 위치는 서버가 계산**합니다.
+- `FFPGMove.DeltaTime` — 재실행(Replay) 시 각 Move가 **자신이 적용됐던 시간 폭**을 기억하고 있어야 같은 결과가 나옵니다. `CharacterMovementComponent`의 `SavedMove`와 같은 이유입니다.
+
+> 🔴 **`BoostCooldownRemaining`과 `StallSeconds`가 원안에서 빠져 있었습니다** (2026-08-12, 구현 중 발견).
+> 둘 다 **프레임을 넘어 누적되는 값**이라, 상태 구조체 밖에 있으면 화해 후 `PendingMoves`를 재실행할 때 원본과 다른 결과가 나옵니다. 쿨다운이 리셋돼 부스트가 무한이 되거나, 스톨 진입 시점이 매번 달라집니다.
+> 증상이 "가끔 화면이 튄다"로만 나타나 추적이 극히 어려운 종류입니다.
+>
+> **이 구조체에 필드를 추가할 때의 판단 기준**: *"이 값이 없으면 재실행 결과가 달라지는가?"* 달라진다면 반드시 여기 넣어야 합니다.
+> `FPG.Flight.SimulateMove.Replay` 테스트가 이 조건을 검사합니다 — 중간 상태로 되돌린 뒤 재실행해 원본과 **비트 단위로** 일치하는지 봅니다.
 
 ---
 

@@ -10,6 +10,7 @@
 | 파일 | 내용 | 근거 문서 |
 |---|---|---|
 | `DT_Aircraft.csv` | 기체 8종 | [07 §7.2](../../docs/07_progression_economy.md), [02 §2.2](../../docs/02_core_gameplay.md) |
+| `DT_Flight.csv` | **기체 공통 비행 수치 20종** — `SimulateMove()`가 전부 참조 | [02 §2.2](../../docs/02_core_gameplay.md), [03 C-1](../../docs/03_controls_input_spec.md) |
 | `DT_Item.csv` | 무기·아이템 16종 | [06](../../docs/06_combat_items.md) |
 | `DT_Module.csv` | 부품 6종 | [07](../../docs/07_progression_economy.md) |
 | `DT_Poi.csv` | 상점 POI 3종 | [05](../../docs/05_map_poi_minimap.md) |
@@ -99,6 +100,7 @@ py Tools/validate_data.py
 | **C1** | `#` 주석 행 없음 (언리얼 임포터 호환) | 추가 |
 | **E1** | 열거형 값이 §17.2 정의 안 | 추가 |
 | **E2** | 레벨 곡선 정합성 (레벨 연속·단조 증가·누적 일치) | 추가 (D-14 재발 방지) |
+| **E4** | `DT_Flight`의 키가 `SimulateMove()`가 읽는 것과 정확히 일치 | 추가 (아래 참조) |
 | **E3** | 음수가 오면 안 되는 열의 부호 | 추가 |
 
 ### 아직 못 하는 것
@@ -115,4 +117,5 @@ py Tools/validate_data.py
 
 - **V10은 대리 검사입니다.** 원 규칙은 "전투 드롭 테이블"을 대상으로 하지만, `DT_ItemDropRate`는 아이템별이 아니라 (Context × Grade) 확률표라 직접 검사할 대상이 없습니다. 드롭 로직이 구현되면 원 규칙으로 교체하십시오.
 - **줄바꿈(CRLF)은 검사하지 않습니다.** `.gitattributes`의 `* text=auto eol=lf`가 커밋 시 정규화하므로, 작업 트리 상태로 실패시키면 거짓 양성이 됩니다. 반면 **BOM은 git이 정규화해 주지 않아** 검사합니다 — Excel에서 "CSV UTF-8"로 저장하면 실제로 붙습니다.
+- **E4는 양방향으로 검사합니다.** 키가 빠지면 `FFPGFlightParams`의 하드코딩 기본값이 조용히 쓰여 *CSV를 고쳐도 비행이 안 변하는* 상황이 됩니다(P5 위반). 반대로 코드가 읽지 않는 키가 있으면 오타이거나 죽은 값이므로 그것도 실패시킵니다.
 - **C1은 docs/17의 `#` 주석 규약과 의도적으로 충돌합니다.** 언리얼 내장 임포터가 첫 행을 무조건 헤더로 읽어, 주석이 있으면 *에디터에서만 깨지고 CI는 통과하는* 최악의 조합이 됩니다. 커스텀 로더를 도입하기로 결정하면 이 검사를 제거하십시오.

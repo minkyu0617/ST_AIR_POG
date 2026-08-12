@@ -6,6 +6,13 @@ public class FPG : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		// 모듈 루트를 include 기준점으로 삼습니다.
+		// docs/16 §16.12는 폴더를 계층으로 쓰므로(Flight/ Combat/ UI/ ...)
+		// 폴더 간 include가 계속 생깁니다. 이렇게 해두면 상대 경로(../../) 없이
+		//   #include "Flight/FlightMovementComponent.h"
+		// 처럼 계층이 드러나는 형태로 쓸 수 있고, 파일을 옮겨도 안 깨집니다.
+		PublicIncludePaths.Add(ModuleDirectory);
+
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

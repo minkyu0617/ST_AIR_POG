@@ -39,8 +39,20 @@ AIRCRAFT_STATS = ("Speed", "Accel", "Turn", "Durability", "BoostPower")
 EXPECTED_TABLES = [
     "DT_Aircraft", "DT_Item", "DT_Module", "DT_Poi", "DT_Map", "DT_Mode",
     "DT_Economy", "DT_Progression", "DT_LevelCurve", "DT_ItemDropRate",
-    "DT_Enemy", "DT_DifficultyScaling",
+    "DT_Enemy", "DT_DifficultyScaling", "DT_Flight",
 ]
+
+# DT_Flight가 반드시 담고 있어야 하는 키. SimulateMove()가 전부 참조하므로
+# 하나라도 빠지면 비행이 기본값으로 조용히 돌아갑니다 (P5 위반).
+REQUIRED_FLIGHT_KEYS = {
+    "CRUISE_SPEED", "ACCEL_THRUST", "DECEL_BRAKE", "THROTTLE_RATE",
+    "ROLL_MAX_ANGLE", "BANK_TURN_RATE_AT_30DEG", "BANK_TURN_RATE_AT_75DEG",
+    "ATTITUDE_INERTIA_SEC", "SPEED_LOSS_ROLL_PCT", "SPEED_LOSS_VECTOR_PCT",
+    "SPEED_LOSS_MAX_PCT", "DIVE_ACCEL_BONUS", "DIVE_ACCEL_REF_PITCH",
+    "STALL_SPEED", "STALL_ENTER_SEC", "STALL_RECOVER_SPEED",
+    "STALL_INPUT_SCALE", "STALL_NOSE_DOWN_RATE",
+    "ALTITUDE_CEILING_M", "ALTITUDE_CEILING_POWER_MULT",
+}
 
 
 class Report:
@@ -304,6 +316,29 @@ def extra_level_curve(tables: dict[str, list[dict]], report: Report) -> None:
     report.finish("E2")
 
 
+def extra_flight_keys(tables: dict[str, list[dict]], report: Report) -> None:
+    """E4. DT_Flight에 SimulateMove()가 참조하는 키가 전부 있는가.
+
+    빠진 키가 있으면 FFPGFlightParams의 하드코딩 기본값이 조용히 쓰입니다.
+    그러면 CSV를 고쳐도 비행이 안 변하는, 원인 찾기 어려운 상황이 됩니다. (P5)
+    """
+    rows = tables.get("DT_Flight", [])
+    if not rows:
+        report.skip("E4", "DT_Flight가 비어 있어 검사 불가")
+        return
+
+    present = {r.get("Id", "") for r in rows}
+    for key in sorted(REQUIRED_FLIGHT_KEYS - present):
+        report.fail("E4", f"DT_Flight: '{key}' 누락 — SimulateMove()가 참조하는 값입니다")
+    for key in sorted(present - REQUIRED_FLIGHT_KEYS):
+        report.fail("E4", f"DT_Flight: '{key}' 는 코드가 읽지 않는 값입니다 (오타 또는 미사용)")
+
+    for i, row in enumerate(rows, start=2):
+        if to_float(row.get("Value", "")) is None:
+            report.fail("E4", f"DT_Flight:{i}: {row.get('Id')} Value가 숫자가 아님")
+    report.finish("E4")
+
+
 def extra_numeric_sanity(tables: dict[str, list[dict]], report: Report) -> None:
     """E3. 음수가 들어오면 안 되는 열에 음수가 있는가.
 
@@ -363,7 +398,8 @@ def main() -> int:
     for rule in (
         rule_v1_unique_ids, rule_v2_stat_sum, rule_v5_supported_modes,
         rule_v6_drop_rate, rule_v8_unlock_level, rule_v9_speed_order,
-        rule_v10_mode_mask, extra_enums, extra_level_curve, extra_numeric_sanity,
+        rule_v10_mode_mask, extra_enums, extra_level_curve, extra_flight_keys,
+        extra_numeric_sanity,
     ):
         rule(tables, report)
 
