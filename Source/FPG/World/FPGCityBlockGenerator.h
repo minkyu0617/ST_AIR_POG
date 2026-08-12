@@ -75,6 +75,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "FPG|City", meta = (ClampMin = "0", ClampMax = "1"))
 	float TowerChance = 0.12f;
 
+	/**
+	 * 이 액터 원점(=보통 PlayerStart를 놓는 자리) 주변에는 건물을 세우지 않는 반경(cm).
+	 *
+	 * 격자 Row 0이 원래 원점에 바로 붙어 있어, 생성기를 스폰 지점 근처에 두면
+	 * 기체가 건물 속에서 스폰될 수 있습니다. BlockAll 충돌에 막혀 "W를 눌러도
+	 * 전진하지 않는" 증상으로 나타나며 원인 추적이 쉽지 않습니다.
+	 * 기본 15,000(150m)이면 웬만한 스폰 여유는 확보됩니다.
+	 */
+	UPROPERTY(EditAnywhere, Category = "FPG|City")
+	float ClearRadius = 15000.f;
+
 	/** 각진 건물. */
 	UPROPERTY(VisibleAnywhere, Category = "FPG|City")
 	TObjectPtr<UInstancedStaticMeshComponent> Buildings;

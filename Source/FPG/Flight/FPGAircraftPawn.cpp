@@ -106,6 +106,18 @@ void AFPGAircraftPawn::Tick(float DeltaSeconds)
 		Corrected.Location = GetActorLocation();
 		Movement->SetStateSnapshot(Corrected);
 
+		// 화면에 바로 표시합니다. "W를 눌러도 전진하지 않는다"류의 증상은
+		// 원인이 충돌인지 입력인지 로그를 뒤지지 않고는 구분하기 어렵습니다.
+		// 스폰 지점이 건물 속에 파묻히면 매 프레임 여기 걸리므로 즉시 드러납니다.
+#if !UE_BUILD_SHIPPING
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				/*Key=*/ 7777, /*TimeToDisplay=*/ 0.f, FColor::Red,
+				FString::Printf(TEXT("FPG: 충돌로 막힘 — %s"), *GetNameSafe(Hit.GetActor())));
+		}
+#endif
+
 		// TODO(M1): docs/02 §2.4 — 지형 충돌은 즉사 또는 HP -60.
 		//           HealthComponent가 생기면 여기서 데미지를 넘깁니다.
 	}

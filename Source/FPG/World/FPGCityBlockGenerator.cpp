@@ -78,6 +78,14 @@ void AFPGCityBlockGenerator::GenerateCity()
 			// 건물 원점이 바닥 중심이 되도록, 절반 높이만큼 위로 올립니다.
 			const FVector Location(BaseX + JitterX, BaseY + JitterY, Height * 0.5f);
 
+			// 액터 원점(보통 PlayerStart를 두는 자리) 주변은 비워 둡니다.
+			// 여기 안 걸러지면 스폰 지점이 건물 속에 파묻혀 "이동이 안 된다"는
+			// 증상으로 나타나고, BlockAll 충돌 탓이라는 걸 알아채기 어렵습니다.
+			if (FVector::DistSquared2D(Location, FVector::ZeroVector) < FMath::Square(ClearRadius))
+			{
+				continue;
+			}
+
 			if (Stream.FRand() < TowerChance)
 			{
 				const float Radius = Footprint * 0.5f;
