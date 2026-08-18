@@ -47,8 +47,10 @@
 | **개발 환경** | ✅ **VS 2022 Community + Epic Games Launcher 설치 완료** (2026-08-11) |
 | **Unreal Engine 5.8** | ✅ **설치 완료** `D:\UE_5.8` |
 | **`FPG` 프로젝트** | ✅ **생성·빌드·기동 확인 완료** (2026-08-11) — **M0 종료** |
-| 코드 | 🟡 **모듈 골격만** — 게임플레이 코드는 M1부터 |
-| 에셋 | ❌ 없음 |
+| **M1 진행** | 🟡 `SimulateMove()` · 폰/입력 · DataRegistry · 도심 배경 완료 |
+| 코드 | 🟡 비행 코어 + 데이터 계층. 전투·POI·HUD는 아직 |
+| 에셋 | ❌ 없음 (프로그래머 아트로 진행 중) |
+| ⚠️ 레벨 | **저장된 레벨이 없습니다** — `Untitled` 상태로 작업 중. 테스트 재개 시 `Content/Maps/`에 저장할 것 |
 | Steam 등록 | ❌ 안 함 |
 | 상표 검색 | ❌ 미확인 — 제목 확정 시 필요 (M4 전) |
 
@@ -216,11 +218,32 @@
 >
 > 설치 경로를 뺀 **모든 옵션은 나중에 추가/제거 가능**합니다 (런처 → 버전 드롭다운 → 옵션).
 > 그러니 지금은 최소로 깔고 필요할 때 추가하는 편이 낫습니다.
-- [x] ~~`ValidateAll()` 데이터 검증 골격 + CI 연결~~ → ✅ **선행 구현 완료** (2026-08-11)
-      [`Tools/validate_data.py`](Tools/validate_data.py) — 13개 규칙 검사, GitHub Actions 연동.
-      **CSV 고치면 `py Tools/validate_data.py` 먼저 돌릴 것.** 상세 → [Config/DataTables/README.md](Config/DataTables/README.md)
-- [ ] 엔진 도입 후: 위 규칙을 C++ `UFPGDataRegistry::ValidateAll()`로 이관 + V3·V4·V7 추가
+- [x] ~~`ValidateAll()` 데이터 검증 골격 + CI 연결~~ → ✅ **완료** (2026-08-11)
+      [`Tools/validate_data.py`](Tools/validate_data.py) — 14개 규칙, GitHub Actions 연동
+- [x] ~~C++ `UFPGDataRegistry::ValidateAll()`~~ → ✅ **완료** (2026-08-12). 로드 결과에 대한 2차 방어선
+- [ ] V3·V4·V7은 에셋·문자열 테이블이 생기는 M2에 추가
       결정할 것: **CSV `#` 주석을 지원하는 커스텀 로더를 만들 것인가, 규약을 폐기할 것인가**
+
+---
+
+## 🔧 개발 중 반드시 알아야 할 것
+
+### 커밋 전에 이걸 돌리십시오
+```powershell
+.\Tools\run_tests.ps1
+```
+데이터 검증 + 빌드 + 자동화 테스트를 한 번에 돌립니다. **에디터를 먼저 닫아야 합니다** (Live Coding이 빌드를 막습니다).
+
+> 🔴 **GitHub Actions는 C++ 테스트를 돌리지 못합니다.** 호스티드 러너에 언리얼 엔진이 없어서입니다(약 43GB + 라이선스).
+> CI가 초록불이어도 **`SimulateMove()` 결정론은 검증되지 않은 상태**입니다. 로컬 실행이 유일한 방어선입니다.
+> 해소하려면 엔진이 설치된 자체 호스팅 러너가 필요합니다 (M2 이후 검토).
+
+### 밸런스 튜닝 방법 (재컴파일 불필요)
+`Config/DataTables/*.csv`를 고치고 게임을 다시 실행하면 됩니다. `UFPGDataRegistry`가 시작 시 읽습니다.
+- 비행 손맛 → `DT_Flight.csv` (기체 공통) · `DT_Aircraft.csv` (기체별)
+- 키를 추가·변경하면 `Tools/validate_data.py`의 `REQUIRED_FLIGHT_KEYS`와 `FFPGFlightParams`도 함께 고쳐야 합니다 (규칙 E4가 강제)
+
+---
 
 ### M1 — 수직 슬라이스 (1.5개월) 🔴 **최중요**
 > 활주로 이륙 → 협곡 비행 → 정비소 1곳 → 결승선. **싱글 전용, 프로그래머 아트 허용.**
