@@ -59,6 +59,15 @@
 *.cs      text eol=lf
 *.ini     text eol=lf
 *.json    text eol=lf
+*.py      text eol=lf
+*.yml     text eol=lf
+
+# ⚠️ .ps1 은 **BOM 있는 UTF-8**로 저장해야 합니다.
+#    Windows PowerShell 5.1 은 BOM 이 없으면 UTF-8 파일을 ANSI 로 잘못 읽어
+#    한글 주석·문자열이 깨지고, 심하면 문자열 종결자를 삼켜 파서 오류가 납니다.
+#    BOM 은 파일 내용이라 아래 설정과 무관하게 보존되지만, 새 .ps1 을 만들 때
+#    BOM 을 빼먹지 않도록 여기 남겨 둡니다. 줄바꿈은 Windows 도구와 맞춰 CRLF.
+*.ps1     text eol=crlf
 
 # ── 병합 불가 파일 ───────────────────────────────────────────
 # 바이너리 에셋은 3-way 병합이 불가능합니다. 충돌 시 한쪽을 골라야 하며,

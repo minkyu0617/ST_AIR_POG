@@ -2,6 +2,8 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Core/Services/FPGDataRegistry.h"
+#include "Engine/GameInstance.h"
 #include "Flight/FlightMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -59,8 +61,29 @@ void AFPGAircraftPawn::BeginPlay()
 	const FRotator LevelRotator(0.f, SpawnRotator.Yaw, 0.f);
 	SetActorRotation(LevelRotator);
 
-	// TODO(M1): DT_Aircraft·DT_Flight에서 읽어 SetParams()로 주입해야 합니다. (P5)
-	//           FPGDataRegistry가 생기기 전까지는 FFPGFlightParams의 기본값으로 납니다.
+	// DT_Aircraft·DT_Flight에서 읽어 주입합니다 (P5).
+	// 실패해도 계속 진행합니다 — FFPGFlightParams의 C++ 기본값으로 날 수는 있어야
+	// 데이터 문제로 개발이 멈추지 않습니다. 대신 레지스트리가 로그를 크게 남깁니다.
+	if (const UGameInstance* GI = GetGameInstance())
+	{
+		if (const UFPGDataRegistry* Registry = GI->GetSubsystem<UFPGDataRegistry>())
+		{
+			FFPGFlightParams Params = Movement->GetParams();
+			if (Registry->BuildFlightParams(AircraftId, Params))
+			{
+				Movement->SetParams(Params);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning,
+					TEXT("FPG: DT_Aircraft 에서 '%s' 를 찾지 못해 기본값으로 납니다 (P5 미적용 상태)"),
+					*AircraftId.ToString());
+			}
+		}
+	}
+
+	// ⚠️ SetParams() 다음에 호출해야 합니다. ResetToCruise()가 Params.CruiseSpeed를
+	//    읽어 초기 스로틀을 역산하기 때문입니다.
 	Movement->ResetToCruise(GetActorLocation(), LevelRotator.Quaternion());
 }
 

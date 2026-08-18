@@ -53,6 +53,16 @@ protected:
 	UPROPERTY(EditAnywhere, Config, Category = "FPG|Input")
 	FFPGKeyBindings KeyBindings;
 
+	/**
+	 * 이 폰이 사용할 기체의 데이터 ID (DT_Aircraft.csv의 행 이름).
+	 *
+	 * M1은 기본기 Falcon 하나만 씁니다. 기체 선택·교체(POI 상점)가 생기면
+	 * GameMode나 PlayerState가 이 값을 정해 주게 됩니다 — 킬 수·크레딧처럼
+	 * Pawn이 파괴돼도 남아야 하는 값은 PlayerState에 둡니다 (docs/16 §16.3).
+	 */
+	UPROPERTY(EditAnywhere, Category = "FPG|Flight")
+	FName AircraftId = TEXT("AIRCRAFT_FALCON");
+
 private:
 	/**
 	 * 시뮬레이션 시각.
