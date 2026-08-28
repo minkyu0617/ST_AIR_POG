@@ -1,6 +1,7 @@
 #include "Flight/FPGAircraftPawn.h"
 
 #include "Camera/CameraComponent.h"
+#include "Combat/FPGHealthComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Core/Services/FPGDataRegistry.h"
 #include "Engine/GameInstance.h"
@@ -44,6 +45,11 @@ AFPGAircraftPawn::AFPGAircraftPawn()
 	Camera->FieldOfView = 95.f;   // docs/03 §3.5의 FOV 70~110 범위 안
 
 	Movement = CreateDefaultSubobject<UFlightMovementComponent>(TEXT("FlightMovement"));
+	Health = CreateDefaultSubobject<UFPGHealthComponent>(TEXT("Health"));
+
+	// docs/16 AR2 — 싱글도 리슨 서버로 돌리므로 폰을 처음부터 복제 대상으로 둡니다.
+	// 나중에 켜려 하면 "왜 클라이언트에 안 보이지"를 한참 헤매게 됩니다.
+	bReplicates = true;
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -79,8 +85,18 @@ void AFPGAircraftPawn::BeginPlay()
 					TEXT("FPG: DT_Aircraft 에서 '%s' 를 찾지 못해 기본값으로 납니다 (P5 미적용 상태)"),
 					*AircraftId.ToString());
 			}
+
+			// HP는 기체별(DT_Aircraft.BaseHP), 손상 효과는 공통(DT_Health)입니다.
+			FFPGHealthTuning Tuning;
+			Registry->BuildHealthTuning(Tuning);
+
+			const FFPGAircraftRow* Row = Registry->FindAircraft(AircraftId);
+			Health->InitializeFromData(Row ? Row->BaseHP : 0.f, Tuning);
 		}
 	}
+
+	Health->OnDamageStateChanged.AddUObject(this, &AFPGAircraftPawn::HandleDamageStateChanged);
+	Health->OnDeath.AddUObject(this, &AFPGAircraftPawn::HandleDeath);
 
 	// ⚠️ SetParams() 다음에 호출해야 합니다. ResetToCruise()가 Params.CruiseSpeed를
 	//    읽어 초기 스로틀을 역산하기 때문입니다.
@@ -129,6 +145,17 @@ void AFPGAircraftPawn::Tick(float DeltaSeconds)
 		Corrected.Location = GetActorLocation();
 		Movement->SetStateSnapshot(Corrected);
 
+		// docs/02 §2.4 정적 지형 충돌. 🔴 P3 — 데미지는 서버만 판정합니다.
+		//
+		// ⚠️ 매 프레임 계속 닿아 있으면 프레임마다 60씩 깎여 즉사합니다.
+		//    무적 시간·넉백은 아직 없으므로, 충돌이 실제로 켜지는 시점
+		//    (FPGCityBlockGenerator.bEnableCollision)에 반드시 함께 넣어야 합니다.
+		//    지금은 도시 충돌이 기본 꺼짐이라 드러나지 않을 뿐입니다.
+		if (HasAuthority() && Health && !Health->IsDead())
+		{
+			Health->ApplyDamage(Health->GetTuning().TerrainCollisionDamage, Hit.GetActor());
+		}
+
 		// 화면에 바로 표시합니다. "W를 눌러도 전진하지 않는다"류의 증상은
 		// 원인이 충돌인지 입력인지 로그를 뒤지지 않고는 구분하기 어렵습니다.
 		// 스폰 지점이 건물 속에 파묻히면 매 프레임 여기 걸리므로 즉시 드러납니다.
@@ -141,7 +168,33 @@ void AFPGAircraftPawn::Tick(float DeltaSeconds)
 		}
 #endif
 
-		// TODO(M1): docs/02 §2.4 — 지형 충돌은 즉사 또는 HP -60.
-		//           HealthComponent가 생기면 여기서 데미지를 넘깁니다.
 	}
+}
+
+void AFPGAircraftPawn::HandleDamageStateChanged(EDamageState NewState)
+{
+	// docs/02 §2.5 — 손상 60~31: 최고 속도 −10% / 심각 30~1: −25%, 선회율 −15%.
+	//
+	// Movement의 원본 Params는 건드리지 않고 배율만 갈아끼웁니다.
+	// 정비소 POI에서 회복하면 배율이 1로 돌아가며 원래 성능이 정확히 복구됩니다.
+	if (Movement && Health)
+	{
+		Movement->SetModifiers(Health->GetFlightModifiers());
+	}
+}
+
+void AFPGAircraftPawn::HandleDeath(AActor* Killer)
+{
+	// 시뮬레이션을 멈춥니다. Step()이 Destroyed 상태에서 즉시 반환하므로
+	// 기체는 마지막 위치에 정지합니다.
+	if (Movement)
+	{
+		FFPGMoveState Dead = Movement->GetStateSnapshot();
+		Dead.State = EFlightState::Destroyed;
+		Movement->SetStateSnapshot(Dead);
+	}
+
+	// TODO(M1): docs/02 §2.5 — 스핀 → 폭발 → 파일럿 이젝션 연출.
+	//           부활·기록 종료 판정은 GameMode의 몫입니다 (docs/16 §16.4).
+	//           SingleEnduranceGameMode를 만들 때 OnDeath를 거기에 연결하십시오.
 }

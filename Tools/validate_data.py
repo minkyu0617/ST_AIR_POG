@@ -39,7 +39,7 @@ AIRCRAFT_STATS = ("Speed", "Accel", "Turn", "Durability", "BoostPower")
 EXPECTED_TABLES = [
     "DT_Aircraft", "DT_Item", "DT_Module", "DT_Poi", "DT_Map", "DT_Mode",
     "DT_Economy", "DT_Progression", "DT_LevelCurve", "DT_ItemDropRate",
-    "DT_Enemy", "DT_DifficultyScaling", "DT_Flight",
+    "DT_Enemy", "DT_DifficultyScaling", "DT_Flight", "DT_Health",
 ]
 
 # DT_Flight가 반드시 담고 있어야 하는 키. SimulateMove()가 전부 참조하므로
@@ -52,6 +52,14 @@ REQUIRED_FLIGHT_KEYS = {
     "STALL_SPEED", "STALL_ENTER_SEC", "STALL_RECOVER_SPEED",
     "STALL_INPUT_SCALE", "STALL_NOSE_DOWN_RATE",
     "ALTITUDE_CEILING_M", "ALTITUDE_CEILING_POWER_MULT",
+}
+
+# DT_Health가 반드시 담고 있어야 하는 키. FFPGHealthTuning의 필드와 1:1.
+REQUIRED_HEALTH_KEYS = {
+    "DAMAGED_THRESHOLD_PCT", "CRITICAL_THRESHOLD_PCT",
+    "DAMAGED_MAX_SPEED_MULT", "DAMAGED_TURN_RATE_MULT",
+    "CRITICAL_MAX_SPEED_MULT", "CRITICAL_TURN_RATE_MULT",
+    "TERRAIN_COLLISION_DAMAGE",
 }
 
 
@@ -316,27 +324,49 @@ def extra_level_curve(tables: dict[str, list[dict]], report: Report) -> None:
     report.finish("E2")
 
 
-def extra_flight_keys(tables: dict[str, list[dict]], report: Report) -> None:
-    """E4. DT_Flight에 SimulateMove()가 참조하는 키가 전부 있는가.
+def _check_value_table(tables: dict[str, list[dict]], report: Report,
+                       rule: str, table: str, required: set[str], used_by: str) -> None:
+    """`Id,Value` 표의 키가 코드가 읽는 것과 정확히 일치하는지 양방향 검사.
 
-    빠진 키가 있으면 FFPGFlightParams의 하드코딩 기본값이 조용히 쓰입니다.
-    그러면 CSV를 고쳐도 비행이 안 변하는, 원인 찾기 어려운 상황이 됩니다. (P5)
+    빠진 키가 있으면 C++ 구조체의 하드코딩 기본값이 조용히 쓰입니다.
+    그러면 CSV를 고쳐도 게임이 안 변하는, 원인 찾기 어려운 상황이 됩니다. (P5)
+    반대로 코드가 읽지 않는 키는 오타이거나 죽은 값이므로 그것도 실패시킵니다.
     """
-    rows = tables.get("DT_Flight", [])
+    rows = tables.get(table, [])
     if not rows:
-        report.skip("E4", "DT_Flight가 비어 있어 검사 불가")
+        report.skip(rule, f"{table}가 비어 있어 검사 불가")
         return
 
     present = {r.get("Id", "") for r in rows}
-    for key in sorted(REQUIRED_FLIGHT_KEYS - present):
-        report.fail("E4", f"DT_Flight: '{key}' 누락 — SimulateMove()가 참조하는 값입니다")
-    for key in sorted(present - REQUIRED_FLIGHT_KEYS):
-        report.fail("E4", f"DT_Flight: '{key}' 는 코드가 읽지 않는 값입니다 (오타 또는 미사용)")
+    for key in sorted(required - present):
+        report.fail(rule, f"{table}: '{key}' 누락 — {used_by}가 참조하는 값입니다")
+    for key in sorted(present - required):
+        report.fail(rule, f"{table}: '{key}' 는 코드가 읽지 않는 값입니다 (오타 또는 미사용)")
 
     for i, row in enumerate(rows, start=2):
         if to_float(row.get("Value", "")) is None:
-            report.fail("E4", f"DT_Flight:{i}: {row.get('Id')} Value가 숫자가 아님")
-    report.finish("E4")
+            report.fail(rule, f"{table}:{i}: {row.get('Id')} Value가 숫자가 아님")
+    report.finish(rule)
+
+
+def extra_flight_keys(tables: dict[str, list[dict]], report: Report) -> None:
+    """E4. DT_Flight에 SimulateMove()가 참조하는 키가 전부 있는가."""
+    _check_value_table(tables, report, "E4", "DT_Flight", REQUIRED_FLIGHT_KEYS, "SimulateMove()")
+
+
+def extra_health_keys(tables: dict[str, list[dict]], report: Report) -> None:
+    """E5. DT_Health에 FFPGHealthTuning이 참조하는 키가 전부 있는가."""
+    _check_value_table(tables, report, "E5", "DT_Health", REQUIRED_HEALTH_KEYS, "FFPGHealthTuning")
+
+    # 구간 임계값의 순서가 뒤집히면 손상 상태 판정이 통째로 어긋납니다.
+    rows = {r.get("Id", ""): to_float(r.get("Value", "")) for r in tables.get("DT_Health", [])}
+    damaged = rows.get("DAMAGED_THRESHOLD_PCT")
+    critical = rows.get("CRITICAL_THRESHOLD_PCT")
+    if damaged is not None and critical is not None and not (0 < critical < damaged <= 100):
+        report.fail("E5",
+                    f"DT_Health: 임계값 순서가 잘못됐습니다 "
+                    f"(0 < 심각 {critical} < 손상 {damaged} <= 100 이어야 함)")
+    report.finish("E5")
 
 
 def extra_numeric_sanity(tables: dict[str, list[dict]], report: Report) -> None:
@@ -399,7 +429,7 @@ def main() -> int:
         rule_v1_unique_ids, rule_v2_stat_sum, rule_v5_supported_modes,
         rule_v6_drop_rate, rule_v8_unlock_level, rule_v9_speed_order,
         rule_v10_mode_mask, extra_enums, extra_level_curve, extra_flight_keys,
-        extra_numeric_sanity,
+        extra_health_keys, extra_numeric_sanity,
     ):
         rule(tables, report)
 

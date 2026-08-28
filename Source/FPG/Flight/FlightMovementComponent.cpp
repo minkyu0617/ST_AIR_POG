@@ -234,9 +234,44 @@ void UFlightMovementComponent::BeginPlay()
 	}
 }
 
+FFPGFlightParams UFlightMovementComponent::GetEffectiveParams() const
+{
+	if (Modifiers.IsIdentity())
+	{
+		return Params;   // 손상도 버프도 없을 때가 대부분입니다. 곱셈을 건너뜁니다.
+	}
+
+	FFPGFlightParams Effective = Params;
+
+	// MinSpeed는 깎지 않습니다. 손상으로 최저 속도까지 내려가면 스톨 임계에
+	// 걸려 조작 불능에 가까워지는데, 그건 "추락하지 않는다"는 docs/02 §2.2
+	// 원칙1에 정면으로 어긋납니다.
+	Effective.MaxSpeed   = Params.MaxSpeed * Modifiers.MaxSpeedMult;
+	Effective.BoostSpeed = Params.BoostSpeed * Modifiers.MaxSpeedMult;
+	Effective.CruiseSpeed = FMath::Min(Params.CruiseSpeed, Effective.MaxSpeed);
+
+	Effective.RollRate  = Params.RollRate * Modifiers.TurnRateMult;
+	Effective.PitchRate = Params.PitchRate * Modifiers.TurnRateMult;
+	Effective.YawRate   = Params.YawRate * Modifiers.TurnRateMult;
+	Effective.BankTurnRateAt30 = Params.BankTurnRateAt30 * Modifiers.TurnRateMult;
+	Effective.BankTurnRateAt75 = Params.BankTurnRateAt75 * Modifiers.TurnRateMult;
+
+	Effective.AccelThrust = Params.AccelThrust * Modifiers.AccelMult;
+
+	// 최대 속도가 최소 속도 아래로 내려가면 V9 전제(Min < Max < Boost)가
+	// 깨져 시뮬레이션이 이상해집니다. 배율이 아무리 가혹해도 순서는 지킵니다.
+	Effective.MaxSpeed   = FMath::Max(Effective.MaxSpeed, Params.MinSpeed * 1.05f);
+	Effective.BoostSpeed = FMath::Max(Effective.BoostSpeed, Effective.MaxSpeed * 1.05f);
+
+	return Effective;
+}
+
 void UFlightMovementComponent::SimulateMove(const FFPGMove& Move, float DeltaTime)
 {
-	State = Step(State, Params, Move, DeltaTime);
+	// 🔴 배율을 미리 곱해 **완성된 Params**를 넘깁니다.
+	//    Step() 안에서 배율을 처리하면 순수 함수의 입력이 하나 늘어나고,
+	//    M3 재실행 때 그 값도 함께 되돌려야 하는 부담이 생깁니다.
+	State = Step(State, GetEffectiveParams(), Move, DeltaTime);
 }
 
 void UFlightMovementComponent::ResetToCruise(const FVector& StartLocation, const FQuat& StartRotation)

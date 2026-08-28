@@ -16,9 +16,11 @@
 #include "FPGAircraftPawn.generated.h"
 
 class UFlightMovementComponent;
+class UFPGHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+enum class EDamageState : uint8;
 
 UCLASS()
 class FPG_API AFPGAircraftPawn : public APawn
@@ -33,8 +35,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "FPG|Flight")
 	UFlightMovementComponent* GetFlightMovement() const { return Movement; }
 
+	UFUNCTION(BlueprintPure, Category = "FPG|Health")
+	UFPGHealthComponent* GetHealth() const { return Health; }
+
 protected:
 	virtual void BeginPlay() override;
+
+	/** 손상 상태가 바뀌면 비행 성능 배율을 다시 계산합니다 (docs/02 §2.5). */
+	UFUNCTION()
+	void HandleDamageStateChanged(EDamageState NewState);
+
+	UFUNCTION()
+	void HandleDeath(AActor* Killer);
 
 	/** 루트. 충돌은 여기서 봅니다. */
 	UPROPERTY(VisibleAnywhere, Category = "FPG")
@@ -48,6 +60,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "FPG")
 	TObjectPtr<UFlightMovementComponent> Movement;
+
+	UPROPERTY(VisibleAnywhere, Category = "FPG")
+	TObjectPtr<UFPGHealthComponent> Health;
 
 	/** docs/03 §3.5 — 리바인딩 가능해야 하므로 데이터로 둡니다. */
 	UPROPERTY(EditAnywhere, Config, Category = "FPG|Input")

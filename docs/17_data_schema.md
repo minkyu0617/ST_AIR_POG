@@ -162,6 +162,31 @@ ITEM_RANK_STEAL,RaceOnly,Epic,/Game/Effects/BP_RankSwap.BP_RankSwap_C,0,1,0,0,0,
 
 ---
 
+## 17.4-c DT_Health — 손상 상태 효과 (2026-08-12 신설)
+
+[02 §2.5](02_core_gameplay.md)의 HP 구간별 효과를 데이터로 뺀 것입니다 (P5).
+기체별 최대 HP는 `DT_Aircraft.BaseHP`이고, **구간 임계값과 효과 배율은 전 기체 공통**이라 이 표에 둡니다.
+검증 규칙 **E5**가 코드(`FFPGHealthTuning`)와 키가 일치하는지 양방향으로 검사합니다.
+
+| 키 | 값 | 근거 |
+|---|---|---|
+| `DAMAGED_THRESHOLD_PCT` | 60 | [02 §2.5](02_core_gameplay.md) — HP 60~31 손상 |
+| `CRITICAL_THRESHOLD_PCT` | 30 | 〃 — HP 30~1 심각 |
+| `DAMAGED_MAX_SPEED_MULT` | 0.90 | 〃 — 손상 시 최고 속도 −10% |
+| `DAMAGED_TURN_RATE_MULT` | 1.00 | 〃 — 손상 단계에는 선회 페널티 없음 |
+| `CRITICAL_MAX_SPEED_MULT` | 0.75 | 〃 — 심각 시 최고 속도 −25% |
+| `CRITICAL_TURN_RATE_MULT` | 0.85 | 〃 — 심각 시 선회율 −15% |
+| `TERRAIN_COLLISION_DAMAGE` | 60 | [02 §2.4](02_core_gameplay.md) — 정적 지형 충돌 |
+
+> **배율은 곱셈입니다.** [§17.5](#175-dt_module--부품)의 부품과 같은 이유 — 기체가 무엇이든 비례해서 적용되어야 밸런스가 유지됩니다.
+> 손상 효과·부품·속도 버프 아이템이 **모두 `FFPGFlightModifiers` 하나의 통로**를 지나므로, 원본 CSV 값이 훼손되지 않고 회복 시 정확히 되돌아갑니다.
+
+> ⚠️ **`TERRAIN_COLLISION_DAMAGE`는 [02 §2.4](02_core_gameplay.md)의 "충돌 시 즉사 또는 HP −60" 중 후자를 택한 값입니다.** 어느 쪽인지 문서가 확정하지 않았고, [02 §2.2](02_core_gameplay.md) 원칙1("추락하지 않는다 · 하드코어 시뮬의 좌절을 제거")에 비춰 즉사보다 −60이 맞다고 판단했습니다. M1 플레이테스트에서 재검토하십시오.
+
+> 🔴 **무적 시간이 아직 없습니다.** 지형에 계속 닿아 있으면 매 프레임 60씩 깎여 즉사합니다. 도시 충돌(`FPGCityBlockGenerator.bEnableCollision`)을 켜는 시점에 **무적 시간과 넉백을 반드시 함께** 넣어야 합니다.
+
+---
+
 ## 17.5 DT_Module — 부품
 
 ```csv

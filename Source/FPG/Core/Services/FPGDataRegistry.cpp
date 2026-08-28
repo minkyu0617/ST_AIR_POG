@@ -1,5 +1,6 @@
 #include "Core/Services/FPGDataRegistry.h"
 
+#include "Combat/FPGHealthComponent.h"
 #include "Engine/DataTable.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -31,6 +32,18 @@ namespace
 		static const FName StallNoseDownRate(TEXT("STALL_NOSE_DOWN_RATE"));
 		static const FName AltitudeCeilingM(TEXT("ALTITUDE_CEILING_M"));
 		static const FName AltitudeCeilingMult(TEXT("ALTITUDE_CEILING_POWER_MULT"));
+	}
+
+	/** DT_Health의 키. FFPGHealthTuning의 필드와 1:1 대응합니다. */
+	namespace HealthKeys
+	{
+		static const FName DamagedThreshold(TEXT("DAMAGED_THRESHOLD_PCT"));
+		static const FName CriticalThreshold(TEXT("CRITICAL_THRESHOLD_PCT"));
+		static const FName DamagedMaxSpeed(TEXT("DAMAGED_MAX_SPEED_MULT"));
+		static const FName DamagedTurnRate(TEXT("DAMAGED_TURN_RATE_MULT"));
+		static const FName CriticalMaxSpeed(TEXT("CRITICAL_MAX_SPEED_MULT"));
+		static const FName CriticalTurnRate(TEXT("CRITICAL_TURN_RATE_MULT"));
+		static const FName TerrainCollisionDamage(TEXT("TERRAIN_COLLISION_DAMAGE"));
 	}
 }
 
@@ -96,6 +109,7 @@ bool UFPGDataRegistry::LoadFromDirectory(const FString& Directory, TArray<FStrin
 	ItemTable     = LoadTable(Directory, TEXT("DT_Item"),     FFPGItemRow::StaticStruct(),     OutProblems);
 	ModuleTable   = LoadTable(Directory, TEXT("DT_Module"),   FFPGModuleRow::StaticStruct(),   OutProblems);
 	FlightTable   = LoadTable(Directory, TEXT("DT_Flight"),   FFPGValueRow::StaticStruct(),    OutProblems);
+	HealthTable   = LoadTable(Directory, TEXT("DT_Health"),   FFPGValueRow::StaticStruct(),    OutProblems);
 
 	// DT_Poi·DT_Map·DT_Mode·DT_Enemy·DT_LevelCurve·DT_ItemDropRate는 아직
 	// 읽지 않습니다. 그 값을 쓰는 시스템(POI·모드 규칙·적기·진행도)이 M1
@@ -131,6 +145,27 @@ float UFPGDataRegistry::GetFlightValue(FName Key, float Fallback) const
 		return Row->Value;
 	}
 	return Fallback;
+}
+
+float UFPGDataRegistry::GetHealthValue(FName Key, float Fallback) const
+{
+	if (!HealthTable) { return Fallback; }
+	if (const FFPGValueRow* Row = HealthTable->FindRow<FFPGValueRow>(Key, TEXT("GetHealthValue"), false))
+	{
+		return Row->Value;
+	}
+	return Fallback;
+}
+
+void UFPGDataRegistry::BuildHealthTuning(FFPGHealthTuning& Out) const
+{
+	Out.DamagedThresholdPct    = GetHealthValue(HealthKeys::DamagedThreshold,      Out.DamagedThresholdPct);
+	Out.CriticalThresholdPct   = GetHealthValue(HealthKeys::CriticalThreshold,     Out.CriticalThresholdPct);
+	Out.DamagedMaxSpeedMult    = GetHealthValue(HealthKeys::DamagedMaxSpeed,       Out.DamagedMaxSpeedMult);
+	Out.DamagedTurnRateMult    = GetHealthValue(HealthKeys::DamagedTurnRate,       Out.DamagedTurnRateMult);
+	Out.CriticalMaxSpeedMult   = GetHealthValue(HealthKeys::CriticalMaxSpeed,      Out.CriticalMaxSpeedMult);
+	Out.CriticalTurnRateMult   = GetHealthValue(HealthKeys::CriticalTurnRate,      Out.CriticalTurnRateMult);
+	Out.TerrainCollisionDamage = GetHealthValue(HealthKeys::TerrainCollisionDamage, Out.TerrainCollisionDamage);
 }
 
 bool UFPGDataRegistry::BuildFlightParams(FName AircraftId, FFPGFlightParams& Out) const

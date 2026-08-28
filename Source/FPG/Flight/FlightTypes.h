@@ -137,6 +137,36 @@ struct FFPGMoveState
 };
 
 /**
+ * 비행 성능에 곱해지는 배율.
+ *
+ * 손상 상태(docs/02 §2.5), 부품(docs/17 §17.5), 속도 버프 아이템이 **모두
+ * 이 하나의 통로**를 씁니다. 각자 Params를 직접 건드리게 두면 원본 CSV 값이
+ * 어디서 훼손됐는지 추적할 수 없게 됩니다.
+ *
+ * 곱셈인 이유: docs/17 §17.5 — "배율 방식을 쓰면 기체가 무엇이든 비례해서
+ * 적용됩니다. 덧셈 방식은 약한 기체에 과도하게 유리해져 밸런스가 깨집니다."
+ *
+ * 🔴 P4 유지: 배율은 `Step()` 안으로 들어가지 않습니다. 호출자가 미리 곱해
+ *    **완성된 Params**를 넘기므로 순수 함수 계약이 그대로입니다.
+ */
+USTRUCT()
+struct FFPGFlightModifiers
+{
+	GENERATED_BODY()
+
+	UPROPERTY() float MaxSpeedMult = 1.f;
+	UPROPERTY() float TurnRateMult = 1.f;   // Roll·Pitch·Yaw 전부
+	UPROPERTY() float AccelMult = 1.f;
+
+	bool IsIdentity() const
+	{
+		return FMath::IsNearlyEqual(MaxSpeedMult, 1.f)
+			&& FMath::IsNearlyEqual(TurnRateMult, 1.f)
+			&& FMath::IsNearlyEqual(AccelMult, 1.f);
+	}
+};
+
+/**
  * 시뮬레이션이 쓰는 모든 수치.
  *
  * 🔴 P5 — 밸런스 수치는 코드에 하드코딩하지 않습니다.

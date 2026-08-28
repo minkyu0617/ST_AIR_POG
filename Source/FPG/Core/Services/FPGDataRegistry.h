@@ -34,6 +34,11 @@ public:
 	/** DT_Flight 등 `Id,Value` 표의 값. 없으면 Fallback을 돌려줍니다. */
 	float GetFlightValue(FName Key, float Fallback) const;
 
+	float GetHealthValue(FName Key, float Fallback) const;
+
+	/** DT_Health를 읽어 손상 상태 효과 수치를 만듭니다. 값이 없으면 인자의 기존 값 유지. */
+	void BuildHealthTuning(struct FFPGHealthTuning& Out) const;
+
 	/**
 	 * 시뮬레이션 파라미터를 만듭니다 — 이 클래스의 존재 이유.
 	 *
@@ -76,4 +81,5 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UDataTable> ItemTable;
 	UPROPERTY(Transient) TObjectPtr<UDataTable> ModuleTable;
 	UPROPERTY(Transient) TObjectPtr<UDataTable> FlightTable;
+	UPROPERTY(Transient) TObjectPtr<UDataTable> HealthTable;
 };

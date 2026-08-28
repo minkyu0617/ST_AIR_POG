@@ -1,5 +1,6 @@
 #include "UI/FPGDebugHUD.h"
 
+#include "Combat/FPGHealthComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Flight/FPGAircraftPawn.h"
@@ -30,6 +31,29 @@ namespace
 		case EFlightState::Vector:    return TEXT("VECTOR");
 		case EFlightState::Destroyed: return TEXT("DOWN");
 		default:                      return TEXT("NORMAL");
+		}
+	}
+
+	/** docs/02 §2.5 의 HP 구간. 심각 구간은 HUD 적색으로 규정돼 있습니다. */
+	FLinearColor DamageStateColor(EDamageState State)
+	{
+		switch (State)
+		{
+		case EDamageState::Damaged:  return FLinearColor(1.f, 0.8f, 0.2f);
+		case EDamageState::Critical: return FLinearColor(1.f, 0.25f, 0.2f);
+		case EDamageState::Dead:     return FLinearColor(0.5f, 0.1f, 0.1f);
+		default:                     return FLinearColor(0.4f, 0.9f, 0.5f);
+		}
+	}
+
+	const TCHAR* DamageStateText(EDamageState State)
+	{
+		switch (State)
+		{
+		case EDamageState::Damaged:  return TEXT("[손상]");
+		case EDamageState::Critical: return TEXT("[심각]");
+		case EDamageState::Dead:     return TEXT("[격추]");
+		default:                     return TEXT("");
 		}
 	}
 }
@@ -87,7 +111,9 @@ void AFPGDebugHUD::DrawFlightPanel(const UFlightMovementComponent& Movement, flo
 	const float BarWidth = 180.f * Scale;
 	float Y = PanelY;
 
-	const FFPGFlightParams& Params = Movement.GetParams();
+	// 배율이 적용된 값을 씁니다. 손상 상태에서 최고 속도가 깎였는데 HUD가
+	// 원본을 보여주면 게이지와 체감이 어긋납니다.
+	const FFPGFlightParams Params = Movement.GetEffectiveParams();
 	const float Speed = Movement.GetSpeed();
 
 	// ── 속도 ─────────────────────────────────────────────────
@@ -157,6 +183,31 @@ void AFPGDebugHUD::DrawFlightPanel(const UFlightMovementComponent& Movement, flo
 	const EFlightState State = Movement.GetFlightState();
 	DrawText(FString::Printf(TEXT("STATE %s"), StateText(State)),
 		StateColor(State), PanelX, Y, nullptr, Scale);
+	Y += LineHeight * 1.5f;
+
+	// ── HP (docs/02 §2.5) ────────────────────────────────────
+	const AFPGAircraftPawn* Aircraft = Cast<AFPGAircraftPawn>(GetOwningPawn());
+	const UFPGHealthComponent* HealthComp = Aircraft ? Aircraft->GetHealth() : nullptr;
+	if (HealthComp)
+	{
+		const EDamageState Damage = HealthComp->GetDamageState();
+		DrawText(
+			FString::Printf(TEXT("HP   %.0f / %.0f   %s"),
+				HealthComp->GetCurrentHP(), HealthComp->GetMaxHP(), DamageStateText(Damage)),
+			DamageStateColor(Damage), PanelX, Y, nullptr, Scale);
+		Y += LineHeight;
+		DrawBar(PanelX, Y, BarWidth, HealthComp->GetHealthRatio(), DamageStateColor(Damage));
+
+		// 손상 배율이 실제로 걸렸는지 눈으로 확인하는 지점입니다.
+		const FFPGFlightModifiers& Mods = Movement.GetModifiers();
+		if (!Mods.IsIdentity())
+		{
+			Y += LineHeight;
+			DrawText(
+				FString::Printf(TEXT("       속도 x%.2f · 선회 x%.2f"), Mods.MaxSpeedMult, Mods.TurnRateMult),
+				DamageStateColor(Damage), PanelX, Y, nullptr, Scale * 0.9f);
+		}
+	}
 }
 
 void AFPGDebugHUD::DrawHUD()

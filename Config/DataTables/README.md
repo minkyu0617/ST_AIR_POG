@@ -11,6 +11,7 @@
 |---|---|---|
 | `DT_Aircraft.csv` | 기체 8종 | [07 §7.2](../../docs/07_progression_economy.md), [02 §2.2](../../docs/02_core_gameplay.md) |
 | `DT_Flight.csv` | **기체 공통 비행 수치 20종** — `SimulateMove()`가 전부 참조 | [02 §2.2](../../docs/02_core_gameplay.md), [03 C-1](../../docs/03_controls_input_spec.md) |
+| `DT_Health.csv` | **손상 상태 효과 7종** — HP 구간 임계값·비행 성능 배율 | [02 §2.5](../../docs/02_core_gameplay.md), [17 §17.4-c](../../docs/17_data_schema.md) |
 | `DT_Item.csv` | 무기·아이템 16종 | [06](../../docs/06_combat_items.md) |
 | `DT_Module.csv` | 부품 6종 | [07](../../docs/07_progression_economy.md) |
 | `DT_Poi.csv` | 상점 POI 3종 | [05](../../docs/05_map_poi_minimap.md) |
@@ -101,6 +102,7 @@ py Tools/validate_data.py
 | **E1** | 열거형 값이 §17.2 정의 안 | 추가 |
 | **E2** | 레벨 곡선 정합성 (레벨 연속·단조 증가·누적 일치) | 추가 (D-14 재발 방지) |
 | **E4** | `DT_Flight`의 키가 `SimulateMove()`가 읽는 것과 정확히 일치 | 추가 (아래 참조) |
+| **E5** | `DT_Health`의 키 일치 + 손상/심각 임계값 순서 | 추가 |
 | **E3** | 음수가 오면 안 되는 열의 부호 | 추가 |
 
 ### 아직 못 하는 것

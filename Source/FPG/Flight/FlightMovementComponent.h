@@ -60,7 +60,31 @@ public:
 	/** DT_Aircraft·DT_Flight에서 읽어온 값을 주입합니다. (P5) */
 	void SetParams(const FFPGFlightParams& NewParams) { Params = NewParams; }
 
+	/** CSV 원본 값. 배율이 적용되지 않은 기준선입니다. */
 	const FFPGFlightParams& GetParams() const { return Params; }
+
+	/**
+	 * 손상·부품·버프의 배율을 설정합니다.
+	 *
+	 * 원본 Params는 건드리지 않습니다. 매 프레임 곱해서 쓰기 때문에,
+	 * 손상이 회복되면 배율만 1로 돌리면 원래 성능이 정확히 복구됩니다.
+	 * (Params를 직접 깎았다면 원본을 어디선가 따로 보관해야 했을 것입니다)
+	 */
+	void SetModifiers(const FFPGFlightModifiers& NewModifiers) { Modifiers = NewModifiers; }
+
+	const FFPGFlightModifiers& GetModifiers() const { return Modifiers; }
+
+	/**
+	 * 배율이 적용된 실제 비행 성능. HUD·디버그가 이걸 봐야 체감과 맞습니다.
+	 *
+	 * Blueprint에 노출하지 않습니다 — 위의 C++ 전용 원칙과 같은 이유입니다.
+	 * BP가 필요한 스칼라는 아래 접근자로 따로 열어 둡니다.
+	 */
+	FFPGFlightParams GetEffectiveParams() const;
+
+	/** HUD 게이지용. 손상 배율이 반영된 값입니다. */
+	UFUNCTION(BlueprintPure, Category = "FPG|Flight")
+	float GetEffectiveMaxSpeed() const { return GetEffectiveParams().MaxSpeed; }
 
 	/** 순항 속도에 해당하는 스로틀로 초기화합니다. */
 	void ResetToCruise(const FVector& StartLocation, const FQuat& StartRotation);
@@ -96,4 +120,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "FPG|Flight")
 	FFPGFlightParams Params;
+
+	UPROPERTY(Transient)
+	FFPGFlightModifiers Modifiers;
 };
