@@ -1,0 +1,17 @@
+Id,Category,Grade,EffectClass,Damage,Ammo,Cooldown,Range,ProjectileSpeed,RequiresLockOn,Duration,Radius,ModeMask,ShopPrice,WarnBeforeFire
+ITEM_VULCAN,Gun,Common,,8,-1,0.083,90000,220000,false,0,0,All,0,0
+ITEM_GUIDED_MISSILE,Attack,Common,,30,3,2.0,150000,45000,true,0,0,All,40,0.3
+ITEM_ROCKET_POD,Attack,Common,,9,2,3.0,60000,60000,false,0,0,All,40,0
+ITEM_LASER_LANCE,Attack,Rare,,55,2,6.0,200000,0,false,1.5,0,All,90,1.5
+ITEM_SKY_MINE,Attack,Rare,,45,3,2.0,0,0,false,15.0,3000,All,90,0
+ITEM_EMP_BURST,Attack,Epic,,0,1,0,40000,0,false,3.0,40000,All,180,0.4
+ITEM_DRONE_SWARM,Attack,Epic,,60,1,0,80000,30000,false,12.0,0,All,180,0.4
+ITEM_RAILGUN,Attack,Legendary,,85,1,0,300000,0,false,0,0,All,400,0.4
+ITEM_FLARE,Defense,Common,,0,3,1.0,0,0,false,4.0,0,All,40,0
+ITEM_REPAIR_PACK,Defense,Common,,-35,2,0,0,0,false,3.0,0,All,40,0
+ITEM_SHIELD_FIELD,Defense,Rare,,0,1,0,0,0,false,2.5,0,All,90,0
+ITEM_NITRO,Utility,Rare,,0,1,0,0,0,false,8.0,0,All,90,0
+ITEM_SMOKE_TRAIL,Utility,Common,,0,2,1.0,0,0,false,15.0,5000,All,40,0
+ITEM_WIND_DRAFT,RaceOnly,Rare,,0,1,0,0,0,false,8.0,0,SpeedOnly,90,0
+ITEM_TELEPORT_MARK,RaceOnly,Rare,,0,1,0,0,0,false,4.0,0,SpeedOnly,90,0
+ITEM_RANK_STEAL,RaceOnly,Epic,,0,1,0,0,0,false,0,0,SpeedOnly,180,1.0

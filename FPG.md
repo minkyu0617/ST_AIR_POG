@@ -3,7 +3,7 @@
 > **이 문서 하나만 읽으면 프로젝트를 이어받을 수 있도록** 작성했습니다.
 > 새 작업 세션(로컬 Claude Code 포함)을 시작할 때 이 파일을 먼저 여세요.
 >
-> 최종 갱신: **2026-08-02** · 저장소 `ST_AIR_POG` · 프로젝트 코드명 **`FPG`** · 게임 제목 **미정**
+> 최종 갱신: **2026-09-15** · 저장소 `ST_AIR_POG` · 프로젝트 코드명 **`FPG`** · 게임 제목 **미정**
 
 ## 이름에 대해 — 먼저 읽으세요
 
@@ -22,9 +22,10 @@
 
 ## 🎯 지금 바로 할 일 (요약)
 
-1. **D-01 엔진 결정** — Unreal 5.6 권장. 이것만 정하면 M0 착수 가능 ([근거: docs/10](docs/10_tech_stack.md))
-2. **D-02 ~ D-04 조작 결정** — 전부 권장안이 준비돼 있어 확인만 하면 됨 ([docs/14](docs/14_open_questions.md))
-3. **M1 수직 슬라이스 착수** — 만들 것 목록은 아래 §5
+1. **M1 빌드를 돌려 보세요** → **[docs/18 빌드 & 테스트 가이드](docs/18_m1_test_guide.md)**
+   Unreal 5.6 + Visual Studio 2022 필요. CSV 임포트와 테스트 레벨 제작까지 약 20분
+2. **손맛을 평가하세요** — 이게 M1 게이트의 전부입니다 (아래 §5 통과 기준)
+3. 빌드 오류가 나면 메시지를 그대로 알려 주세요. **이 코드는 언리얼로 컴파일해 본 적이 없습니다**
 
 **게임 제목은 기다리지 마세요.** 코드와 분리돼 있어 개발을 막지 않습니다.
 
@@ -34,15 +35,19 @@
 
 | 항목 | 상태 |
 |---|---|
-| 설계 문서 | ✅ **완료** (18종, `docs/`) |
+| 설계 문서 | ✅ **완료** (19종, `docs/`) |
 | 프로젝트 코드명 | ✅ **`FPG` 확정** (영구 고정) |
+| 엔진 | ✅ **Unreal Engine 5.6 확정** (D-01) |
 | 게임 제목 | ⚠️ **미정** — CLOUDLINE 폐기, 후보 재탐색 (M4 전까지) |
-| 코드 | ❌ **0줄** — 아직 엔진 프로젝트도 생성 전 |
-| 에셋 | ❌ 없음 |
+| **M0 프로젝트 골격** | ✅ **완료** — `.uproject`, Build.cs, Config, CSV 3종, LFS 설정 |
+| **M1 수직 슬라이스 코드** | ✅ **1차 작성 완료** — 비행/전투/POI/모드/HUD |
+| **빌드 검증** | ❌ **미검증** — 리눅스 컨테이너에서 작성, **컴파일해 본 적 없음** |
+| 플레이테스트 | ❌ 아직 |
+| 에셋 | ❌ 없음 (엔진 기본 도형으로 대체) |
 | Steam 등록 | ❌ 안 함 |
 | 상표 검색 | ❌ 미확인 — 제목 확정 시 필요 (M4 전) |
 
-**현재 단계: 프리프로덕션 종료 직전. 다음은 M0(설계 확정) → M1(수직 슬라이스).**
+**현재 단계: M1 코드 작성 완료, 첫 빌드 및 손맛 검증 대기.**
 
 브랜치: **`main`** (기본, 최신) · `claude/steam-airplane-game-design-vp7gu9` (작업 브랜치 — 내용 동일, 삭제해도 무방)
 
@@ -59,7 +64,7 @@
 | 인원 | 싱글 1인 / 멀티 2~10인 |
 | 세션 길이 | 레이스 3.5~5분 · 배틀 5~7분 |
 | 가격 | $12.99 / ₩16,500 (EA는 $9.99) |
-| 엔진 | Unreal Engine 5.6 **권장** (미확정 — D-01) |
+| 엔진 | **Unreal Engine 5.6** (확정 — D-01) |
 | 손익분기 | **12,000장** (1인 개발 원가 약 ₩9,800만 기준) |
 
 ### 모드 3종
@@ -106,18 +111,18 @@
 | 항목 | 결정 |
 |---|---|
 | **프로젝트 코드명** | **`FPG`** = Final Pilot Game 🔒 영구 고정 (2026-08-02) |
+| **엔진** | Unreal Engine 5.6 (D-01) |
+| 아이템 변경 키 | `Q` (보조: `Alt`, 마우스 휠) — D-02 |
+| `A`/`D` | 좌우 대칭 롤 + 뱅크턴 자연 발생 — D-03 |
+| `Space` 홀드 중 | 자동 스로틀 유지 — D-04 |
+| 속도 단위 | 문서의 숫자는 m/s, 코드/CSV는 ×100 하여 uu/s — D-14 |
 | 클래스 접두어 | `FPG` — `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
 | 모듈·소스 폴더 | `FPG` (`Source/FPG/`) — 모듈명에 `Game`을 덧붙이지 않음(중복) |
 | 저장소 이름 | `ST_AIR_POG` 유지 (이력 보존) |
 | 게임 제목 | ⚠️ **미정** — 코드와 분리되어 있어 개발을 막지 않음 |
 
-### 🔴 M1 착수 전 반드시 결정 → `docs/14`
-| ID | 항목 | 권장안 |
-|---|---|---|
-| **D-01** | 엔진 (Unreal 5.6 vs Unity 6) | **Unreal** — 볼류메트릭 구름 + 리플리케이션 내장 |
-| **D-02** | 아이템 변경 키 (`Alt` 유지?) | **`Q`로 변경** — `Alt`+`Tab`이 게임 창을 최소화시킴 |
-| **D-03** | `A`/`D` 정의 (원안이 좌우 비대칭) | **대칭 롤 + 뱅크턴 자연 발생** |
-| **D-04** | `Space` 홀드 중 가속 처리 | **자동 스로틀 유지** |
+> D-01 ~ D-04는 **문서의 권장안을 그대로 적용해 구현**했습니다(2026-09-15). 손맛을 직접 확인한 뒤
+> 다르게 느껴지면 바꾸세요. 조작 상수는 전부 `DT_Aircraft.csv`와 `FPGFlightSimulation.cpp`에 모여 있습니다.
 
 ### 🟡 M1 전 결정
 | ID | 항목 | 권장안 |
@@ -143,9 +148,12 @@
 
 ## 5. 다음에 할 일 (우선순위 순)
 
-### 즉시
-- [ ] **D-01 ~ D-04 결정** (`docs/14`에 기록) — 특히 엔진
-- [ ] M0 착수 (아래 참조)
+### 즉시 — M1 빌드 검증
+- [ ] **[docs/18](docs/18_m1_test_guide.md) 절차대로 빌드** (UE 5.6 + VS2022)
+- [ ] 컴파일 오류 수정 (첫 빌드는 실패할 수 있음)
+- [ ] CSV 3종을 `Content/Data`에 DataTable로 임포트
+- [ ] 테스트 레벨 제작 (Basic 레벨 + PlayerStart Z=30000 + FPGPoiStation 2~3개)
+- [ ] 자동화 테스트 `FPG.Flight` 통과 확인
 
 ### 게임 제목 (M4 전까지, 개발과 병행)
 - [ ] 후보 3종 검토: `ZEROLIFT` / `CHANDELLE` / `BANKTURN`
@@ -156,25 +164,28 @@
 > ⚠️ 상표 DB(KIPRIS·마크인포 등)는 자동 조회가 차단돼 있어 **사람이 직접** 검색해야 합니다.
 > ⚠️ 제목 미확정이 개발을 막지 않습니다. **M1을 먼저 시작하세요.**
 
-### M0 — 설계 확정 (1개월)
-- [ ] 엔진 설치 및 프로젝트 생성 (`FPG` 모듈)
-- [ ] Git LFS 설정 (`*.uasset` `*.umap` `*.wav` `*.png` `*.fbx`)
-- [ ] `docs/17`의 CSV를 `Config/DataTables/`에 배치
-- [ ] `ValidateAll()` 데이터 검증 골격 + CI 연결
+### M0 — 설계 확정 ✅ 코드 측면 완료
+- [x] 엔진 확정 및 프로젝트 생성 (`FPG` 모듈)
+- [x] Git LFS 설정 (`.gitattributes`)
+- [x] CSV를 `Config/DataTables/`에 배치
+- [x] `ValidateAll()` 데이터 검증 구현 (`FPGDataRegistry`)
+- [ ] CI 연결 (빌드 검증 후)
 
 ### M1 — 수직 슬라이스 (1.5개월) 🔴 **최중요**
 > 활주로 이륙 → 협곡 비행 → 정비소 1곳 → 결승선. **싱글 전용, 프로그래머 아트 허용.**
 
-만들 것 (`docs/16 §16.17`):
+작성 완료 (`Source/FPG/`):
 ```
-FPGGameInstance          FPGAircraftPawn
-FPGDataRegistry          FlightMovementComponent  ← SimulateMove() 순수 함수
-FPGEventBus              HealthComponent
-FPGGameModeBase          WeaponSlotComponent (기총 + 아이템 2종)
-+ SingleEndurance        FPGPoiStation (정비소 1종)
-HUD + 미니맵
+✅ FPGGameInstance / FPGDataRegistry / FPGEventBus
+✅ FPGFlightSimulation   ← Step() 순수 함수 (P4). 결정론 테스트 포함
+✅ FPGFlightMovementComponent / FPGAircraftPawn
+✅ FPGHealthComponent / FPGWeaponSlotComponent (기총 + 과열)
+✅ FPGPoiStation (정비소 / 무기점 거래)
+✅ FPGGameModeBase + FPGSingleEnduranceGameMode (보딩→카운트다운→주행→종료)
+✅ FPGPlayerController (Enhanced Input, C++로 구성)
+✅ FPGDebugHUD (속도/고도/HP/부스트/과열/거리/크레딧 + POI 레이더)
 ```
-미룰 것: 예측/화해, RoomSubsystem, SteamService, 팀 로직, 서든데스, 봇 AI
+미룬 것: 예측/화해, RoomSubsystem, SteamService, 팀 로직, 서든데스, 봇 AI, 아이템 실제 효과
 
 **통과 기준 (외부인 8명 이상 플레이테스트)**
 - [ ] 설명 없이 90초 안에 이륙하고 첫 커브 통과?

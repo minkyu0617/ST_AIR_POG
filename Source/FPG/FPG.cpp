@@ -1,0 +1,5 @@
+#include "FPG.h"
+
+DEFINE_LOG_CATEGORY(LogFPG);
+
+IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, FPG, "FPG");

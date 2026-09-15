@@ -16,8 +16,12 @@
 
 ## 현재 단계
 
-**프리프로덕션 완료, 코드 0줄.** 설계 문서만 존재합니다 (`docs/` 18종).
-다음은 M0(설계 확정) → M1(수직 슬라이스).
+**M1 수직 슬라이스 코드 1차 작성 완료. 아직 컴파일 검증되지 않았습니다.**
+
+- 엔진: Unreal Engine 5.6 (D-01 확정)
+- 코드: `Source/FPG/` — 비행 시뮬레이션, 전투, POI, 모드, HUD
+- ⚠️ **리눅스 컨테이너에서 작성되어 언리얼로 빌드해 본 적이 없습니다.** 빌드 오류 수정이 다음 작업입니다
+- 빌드·테스트 절차: [`docs/18_m1_test_guide.md`](docs/18_m1_test_guide.md)
 
 ## 작업 규칙
 
@@ -36,6 +40,13 @@
 | 클래스 접두어 | `FPG` | `AFPGAircraftPawn`, `UFPGDataRegistry`, `FFPGMove` |
 | 모듈 / 소스 폴더 | `FPG` | `Source/FPG/` |
 | 데이터 ID | 대문자 스네이크 | `AIRCRAFT_FALCON`, `ITEM_RAILGUN` |
+
+## 코드 규칙
+
+- **`FPGFlightSimulation::Step()`은 순수 함수를 유지하십시오.** 월드 접근·난수·시간 조회를 넣으면
+  M3 클라이언트 예측이 깨지고 디버깅이 극히 어려워집니다. 결정론 테스트(`FPG.Flight.Determinism`)가 이를 지킵니다.
+- 밸런스 수치는 `Config/DataTables/*.csv`에만 둡니다.
+- 게임플레이 → UI 통신은 `UFPGEventBus`로만 합니다. 게임플레이 코드가 UI 클래스를 include하지 않습니다.
 
 ## 문서 작성 규칙
 
